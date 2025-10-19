@@ -904,8 +904,51 @@ const TabbedHome = () => {
     return () => {
       Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
     };
-  }, [tabs]);
+  }, [tabs]);  // ← This closes the FIRST useEffect (REMOVE the duplicate at the end)
 
+  // Handle pointer lock for iframes
+  useEffect(() => {  // ← This starts the SECOND useEffect
+    const handlePointerLockChange = () => {
+      // Forward pointer lock state to all iframes
+      Object.values(iframeRefs.current).forEach((iframe) => {
+        if (iframe?.contentWindow) {
+          try {
+            if (document.pointerLockElement) {
+              iframe.contentWindow.postMessage(
+                { type: "pointerlock", locked: true },
+                "*"
+              );
+            } else {
+              iframe.contentWindow.postMessage(
+                { type: "pointerlock", locked: false },
+                "*"
+              );
+            }
+          } catch (error) {
+            console.error("Error communicating pointer lock state:", error);
+          }
+        }
+      });
+    };
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "requestPointerLock") {
+        try {
+          document.body.requestPointerLock();
+        } catch (error) {
+          console.error("Error requesting pointer lock:", error);
+        }
+      }
+    };
+
+    document.addEventListener("pointerlockchange", handlePointerLockChange);
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      document.removeEventListener("pointerlockchange", handlePointerLockChange);
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []); 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
