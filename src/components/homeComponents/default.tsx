@@ -75,6 +75,60 @@ const DefaultHome = () => {
     };
   }, [term]);
 
+  // Handle pointer lock for iframe
+  useEffect(() => {
+    const handlePointerLockRequest = () => {
+      if (frame.current && shouldOpen) {
+        try {
+          // Request pointer lock on the parent document when iframe requests it
+          document.body.requestPointerLock();
+        } catch (error) {
+          console.error("Error requesting pointer lock:", error);
+        }
+      }
+    };
+
+    const handlePointerLockChange = () => {
+      // Forward pointer lock state to iframe if needed
+      if (frame.current?.contentWindow) {
+        try {
+          if (document.pointerLockElement) {
+            // Pointer lock is active
+            frame.current.contentWindow.postMessage(
+              { type: "pointerlock", locked: true },
+              "*"
+            );
+          } else {
+            // Pointer lock was released
+            frame.current.contentWindow.postMessage(
+              { type: "pointerlock", locked: false },
+              "*"
+            );
+          }
+        } catch (error) {
+          console.error("Error communicating pointer lock state:", error);
+        }
+      }
+    };
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "requestPointerLock") {
+        handlePointerLockRequest();
+      }
+    };
+
+    document.addEventListener("pointerlockchange", handlePointerLockChange);
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      document.removeEventListener(
+        "pointerlockchange",
+        handlePointerLockChange
+      );
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [shouldOpen]);
+
   const containerVariants = {
     hidden: {
       opacity: 0,
@@ -208,6 +262,9 @@ const DefaultHome = () => {
         src=""
         ref={frame}
         className={`w-full h-screen ${shouldOpen ? "" : "hidden"} z-20`}
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+        allow="pointer-lock"
+        title="Browser content"
       ></iframe>
       <div
         className={`w-full min-h-screen flex items-center justify-center z-20 ${
@@ -227,7 +284,7 @@ const DefaultHome = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="sm:w-3/12 w-11/12 relative rounded-2xl focus:border-primary border border-input/30 bg-card/20 backdrop-blur-md shadow-lg flex space-x-2 items-center justify-center pr-2 hover:shadow-xl transition-all"
+            className="sm:w-3/12 w-11/12 relative rounded-2xl focus:border-primary border border-input/30 bg-card/20 backdrop-blur-md shadow-lg flex space-x-2 items-center justify-center pr-2 hover:border-primary/50 hover:shadow-xl transition-all"
           >
             <Input
               className="text-white/80 sm:w-[95%] w-full rounded-2xl focus-visible:ring-0 border-none bg-transparent"
@@ -340,7 +397,7 @@ const DefaultHome = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="min-h-[50%] w-[20%] xl:w-[16%] border border-primary/10 sm:flex hidden absolute right-[10rem] justify-center backdrop-blur-md p-4 bg-card/20 rounded-2xl shadow-lg hover:shadow-xl"
+          className="min-h-[50%] w-[20%] xl:w-[16%] border border-primary/10 sm:flex hidden absolute right-[10rem] justify-center backdrop-blur-md p-4 bg-card/20 rounded-2xl shadow-lg hover:shadow-2xl transition-all"
         >
           <div className="relative w-full min-h-full flex flex-col items-center justify-center space-y-3">
             <h2 className="sm:text-xs md:text-sm lg:text-2xl font-medium bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
@@ -374,7 +431,7 @@ const DefaultHome = () => {
                     🌟 Spotlight 🌟
                   </h2>
                   <motion.div
-                    className="w-full h-full flex items-center justify-center px-4 gap-2 border border-amber-500/20 rounded-2xl select-none cursor-pointer shadow-lg p-3 hover:shadow-2xl bg-gradient-to-br from-amber-500/5 to-transparent"
+                    className="w-full h-full flex items-center justify-center px-4 gap-2 border border-amber-500/20 rounded-2xl select-none cursor-pointer shadow-lg p-3 hover:shadow-2xl bg-gradient-to-br from-amber-500/5 to-transparent hover:from-amber-500/10 transition-all"
                     onClick={() => handleSearch(sponser.url)}
                     whileHover={{
                       y: -5,
@@ -417,7 +474,7 @@ const DefaultHome = () => {
       >
         <div className="max-w-[10rem] h-fit flex absolute bottom-5 left-[47.7%] translate-x-[-50%]">
           {shouldOpen && (
-            <div className="handle cursor-move supports-backdrop-blur:bg-white/30 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max gap-2 rounded-2xl border border-primary/20 p-2 backdrop-blur-md rounded-l-2xl rounded-r-none items-center shadow-md">
+            <div className="handle cursor-move supports-backdrop-blur:bg-white/30 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max gap-2 rounded-2xl border border-primary/20 p-2 backdrop-blur-md">
               <AlignJustify className="w-6 h-6 text-primary" />
             </div>
           )}
