@@ -48,3 +48,63 @@ export default tseslint.config({
   },
 })
 ```
+
+## Depoyment Steps
+To deploy Nova, you have many diffrent options depending on where you want to deploy it.
+
+# Deploy Via Pnpm
+
+```bash
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+PORT=3000
+git clone https://github.com/sriail/Nova
+cd Nova
+pnpm i
+pnpm build
+pnpm tsx server.ts
+```
+
+# Deploy Via Vps (Uses pm2)
+
+```bash
+git clone https://github.com/sriail/Nova
+cd Nova
+pnpm i
+pnpm build
+npm install -g pm2
+pm2 start server.ts --interpreter tsx --name nova
+pm2 save
+pm2 startup
+```
+# Deploy On Docker
+
+```Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY . .
+
+# Build frontend
+RUN pnpm build
+
+EXPOSE 3000
+
+CMD ["pnpm", "tsx", "server.ts"]
+```
+Now that you have created the Dockerfile, Its time to run it
+
+```Bash
+docker build -t emerald-modern .
+docker run -p 3000:3000 --env-file .env emerald-modern
+```
