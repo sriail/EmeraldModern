@@ -64,107 +64,14 @@ pnpm build
 pnpm tsx server.ts
 ```
 
-# Deploy Via Vps (Uses pm2)
-```bash
-#!/bin/bash
-# Run this script on your fresh Ubuntu/Debian VPS
-
-set -e
-
-echo "Updating system packages..."
-sudo apt update && sudo apt upgrade -y
-
-echo "Installing Node.js 20.x..."
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-echo "Installing pnpm..."
-sudo npm install -g pnpm
-
-echo "Installing PM2..."
-sudo npm install -g pm2
-
-echo "Installing build essentials..."
-sudo apt install -y build-essential git
-
-echo "Server setup complete!"
-node --version
-pnpm --version
-pm2 --version
-```
+# Deploy Via Docker
 
 ```bash
-#!/bin/bash
-# Deployment script for EmeraldModern
-
-set -e
-
-APP_NAME="emerald-modern"
-APP_DIR="/var/www/emerald-modern"
-REPO_URL="https://github.com/sriail/EmeraldModern.git"
-BRANCH="main"
-
-echo "Starting deployment of $APP_NAME..."
-
-# Create app directory if it doesn't exist
-if [ ! -d "$APP_DIR" ]; then
-    echo "Creating application directory..."
-    sudo mkdir -p $APP_DIR
-    sudo chown $USER:$USER $APP_DIR
-fi
-
-# Navigate to app directory
-cd $APP_DIR
-
-# Clone or pull latest code
-if [ ! -d ".git" ]; then
-    echo "Cloning repository..."
-    git clone $REPO_URL .
-else
-    echo "Pulling latest changes..."
-    git fetch origin
-    git reset --hard origin/$BRANCH
-fi
-
-# Check if .env exists
-if [ ! -f ".env" ]; then
-    echo ".env file not found!"
-    echo "Creating .env template..."
-    cat > .env << 'EOF'
-OPENROUTER_API_KEY=your_api_key_here
+git clone https://github.com/sriail/EmeraldModern.git
+cd EmeraldModern
+cp .env.example .env
+nano .env  # or vim, code, etc.
+OPENROUTER_API_KEY=your_actual_api_key_here
 PORT=3000
 NODE_ENV=production
-EOF
-    echo "Please edit .env file with your actual API key!"
-    exit 1
-fi
-
-# Install dependencies
-echo "Installing dependencies..."
-pnpm install --frozen-lockfile
-
-# Build the application
-echo "Building application..."
-pnpm build
-
-# Stop existing PM2 process
-echo "Stopping existing process..."
-pm2 stop $APP_NAME 2>/dev/null || true
-pm2 delete $APP_NAME 2>/dev/null || true
-
-# Start the application with PM2
-echo "Starting application with PM2..."
-pm2 start tsx --name $APP_NAME -- server.ts
-
-# Save PM2 configuration
-pm2 save
-
-# Setup PM2 startup script (run once)
-sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
-
-echo "Deployment complete!"
-echo "View logs with: pm2 logs $APP_NAME"
-echo "Monitor status: pm2 monit"
-echo "Restart app: pm2 restart $APP_NAME"
-# Deploy On Docker
 ```
