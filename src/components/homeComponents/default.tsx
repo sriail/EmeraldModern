@@ -514,12 +514,6 @@ const DefaultHome = () => {
                 <Gamepad className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
               </Link>
             </DockIcon>
-            <DockIcon>
-              <Link to="/chat">
-                <MessageCircle className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
-              </Link>
-            </DockIcon>
-            <DockIcon>
               <Cog
                 onClick={() => setOpenSettings(true)}
                 className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
