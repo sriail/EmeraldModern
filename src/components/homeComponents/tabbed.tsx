@@ -1,17 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  X,
-  Plus,
-  Maximize,
-  Minimize,
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight,
-  Settings,
-  Search,
-  Home,
-  Bookmark,
-} from "lucide-react";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SearchIcon from "@mui/icons-material/Search";
+import HomeIcon from "@mui/icons-material/Home";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
 import GridPattern from "../ui/grid-pattern";
@@ -171,7 +169,7 @@ const SettingsPage = () => {
                   <Card className="border-border/30 bg-card/80 backdrop-blur-xl shadow-lg rounded-xl overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent pb-6">
                       <CardTitle className="text-xl flex items-center gap-2">
-                        <Settings className="h-5 w-5 text-primary" />
+                        <SettingsIcon className="h-5 w-5 text-primary" />
                         Appearance
                       </CardTitle>
                       <CardDescription>
@@ -292,7 +290,7 @@ const SettingsPage = () => {
                 <Card className="border-border/30 bg-card/80 backdrop-blur-xl shadow-lg rounded-xl overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-green-500/10 to-transparent pb-6">
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <Search className="h-5 w-5 text-green-500" />
+                      <SearchIcon className="h-5 w-5 text-green-500" />
                       Search Engine
                     </CardTitle>
                     <CardDescription>
@@ -1164,7 +1162,7 @@ const TabbedHome = () => {
                 ) : (
                   !tab.url.startsWith("about:") && (
                     <div className="w-4 h-4 mr-2 flex-shrink-0 rounded-sm bg-primary/10 flex items-center justify-center">
-                      <Home size={10} className="text-primary" />
+                      <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
                     </div>
                   )
                 )}
@@ -1174,7 +1172,7 @@ const TabbedHome = () => {
                 onClick={(e) => closeTab(tab.id, e)}
                 className="ml-1 p-0.5 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
               >
-                <X size={14} />
+                <CloseIcon sx={{ fontSize: 14 }} />
               </button>
               {!tab.isActive && (
                 <div className="absolute right-0 top-1 bottom-1 w-px bg-border/30 group-hover:bg-transparent"></div>
@@ -1193,7 +1191,7 @@ const TabbedHome = () => {
             className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-1 transition-colors"
             title="New tab"
           >
-            <Plus size={16} />
+            <AddIcon sx={{ fontSize: 16 }} />
           </button>
         </div>
       </div>
@@ -1206,27 +1204,27 @@ const TabbedHome = () => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Go back"
           >
-            <ChevronLeft size={18} className="text-foreground/70" />
+            <ChevronLeftIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
           </button>
           <button
             onClick={goForward}
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Go forward"
           >
-            <ChevronRight size={18} className="text-foreground/70" />
+            <ChevronRightIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
           </button>
           <button
             onClick={refreshPage}
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Reload page"
           >
-            <RotateCcw size={18} className="text-foreground/70" />
+            <RefreshIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
           </button>
         </div>
 
         <form onSubmit={handleUrlSubmit} className="flex-1 relative group mx-2">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground z-10 pointer-events-none">
-            <Search size={16} />
+            <SearchIcon sx={{ fontSize: 16 }} />
           </div>
           <Input
             ref={urlInputRef}
@@ -1247,7 +1245,7 @@ const TabbedHome = () => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors"
             title="Add bookmark"
           >
-            <Bookmark size={18} className="text-foreground/70" />{" "}
+            <BookmarkIcon sx={{ fontSize: 18 }} className="text-foreground/70" />{" "}
           </button>
           <button
             onClick={toggleFullscreen}
@@ -1255,9 +1253,9 @@ const TabbedHome = () => {
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? (
-              <Minimize size={18} className="text-foreground/70" />
+              <FullscreenExitIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
             ) : (
-              <Maximize size={18} className="text-foreground/70" />
+              <FullscreenIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
             )}
           </button>
           <button
@@ -1265,7 +1263,7 @@ const TabbedHome = () => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors"
             title="Settings"
           >
-            <Settings size={18} className="text-foreground/70" />
+            <SettingsIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
           </button>
         </div>
       </div>
@@ -1337,7 +1335,7 @@ const TabbedHome = () => {
                         className="relative group"
                       >
                         <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">
-                          <Search size={20} />
+                          <SearchIcon sx={{ fontSize: 20 }} />
                         </div>
                         <Input
                           type="text"
@@ -1355,7 +1353,7 @@ const TabbedHome = () => {
                           className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-primary/90 hover:bg-primary text-primary-foreground rounded-full p-2 transition-colors"
                           title="Go"
                         >
-                          <ChevronRight size={20} />
+                          <ChevronRightIcon sx={{ fontSize: 20 }} />
                         </button>
                       </form>
                     </motion.div>

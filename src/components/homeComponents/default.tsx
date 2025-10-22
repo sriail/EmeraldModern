@@ -23,16 +23,13 @@ import {
 } from "../ui/dropdown-menu";
 import { Separator } from "../ui/separator";
 import Draggable from "react-draggable";
-import {
-  House,
-  Gamepad,
-  Cog,
-  Search,
-  AlignJustify,
-  ArrowLeft,
-  ArrowRight,
-  MessageCircle,
-} from "lucide-react";
+import HomeIcon from "@mui/icons-material/Home";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SearchIcon from "@mui/icons-material/Search";
+import MenuIcon from "@mui/icons-material/Menu";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Dock, DockIcon } from "../ui/dock";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -310,7 +307,7 @@ const DefaultHome = () => {
                     />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Search className="h-6 w-6 text-primary" />
+                      <SearchIcon className="h-6 w-6 text-primary" />
                     </div>
                   )}
                 </div>
@@ -475,7 +472,7 @@ const DefaultHome = () => {
         <div className="max-w-[10rem] h-fit flex absolute bottom-5 left-[47.7%] translate-x-[-50%]">
           {shouldOpen && (
             <div className="handle cursor-move supports-backdrop-blur:bg-white/30 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max gap-2 rounded-2xl border border-primary/20 p-2 backdrop-blur-md">
-              <AlignJustify className="w-6 h-6 text-primary" />
+              <MenuIcon className="w-6 h-6 text-primary" />
             </div>
           )}
           <Dock
@@ -486,13 +483,13 @@ const DefaultHome = () => {
           >
             {shouldOpen && (
               <div className="flex space-x-4">
-                <ArrowLeft
+                <ArrowBackIcon
                   onClick={() => {
                     frame.current!.contentWindow?.history.back();
                   }}
                   className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
                 />
-                <ArrowRight
+                <ArrowForwardIcon
                   className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
                   onClick={() =>
                     frame.current?.contentWindow?.history.forward()
@@ -502,7 +499,7 @@ const DefaultHome = () => {
             )}
 
             <DockIcon>
-              <House
+              <HomeIcon
                 className="w-6 h-6 hover:w-8 hover:h-8 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
                 onClick={() => {
                   window.location.reload();
@@ -511,11 +508,11 @@ const DefaultHome = () => {
             </DockIcon>
             <DockIcon>
               <Link to="/games">
-                <Gamepad className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
+                <SportsEsportsIcon className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
               </Link>
             </DockIcon>
             <DockIcon>
-              <Cog
+              <SettingsIcon
                 onClick={() => setOpenSettings(true)}
                 className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
               />
@@ -534,7 +531,7 @@ const DefaultHome = () => {
             </DockIcon>
             {shouldOpen && (
               <DockIcon>
-                <Search
+                <SearchIcon
                   className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
                   onClick={() => setOpenSearch(!openSearch)}
                 />

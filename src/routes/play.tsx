@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import GridPattern from "@/components/ui/grid-pattern";
 import { cn } from "@/lib/utils";
-import { Home, FullscreenIcon, Gamepad } from "lucide-react";
+import HomeIcon from "@mui/icons-material/Home";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { useRef } from "react";
 import useRuffle from "@/components/hooks/useRuffle";
 type GameSearch = {
@@ -86,10 +88,10 @@ function RouteComponent() {
         </div>
         <div className="w-full flex space-x-4 min-w-[80%] max-w-[80%] items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <Home className="w-8 h-8" />
+            <HomeIcon className="w-8 h-8" />
           </Link>
           <Link to="/games" className="flex items-center space-x-2">
-            <Gamepad className="w-8 h-8" />
+            <SportsEsportsIcon className="w-8 h-8" />
           </Link>
           <button
             onClick={() => {
