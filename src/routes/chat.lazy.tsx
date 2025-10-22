@@ -3,7 +3,11 @@ import GridPattern from "@/components/ui/grid-pattern";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Bot, Send, User, Home, Loader2 } from "lucide-react";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import SendIcon from "@mui/icons-material/Send";
+import PersonIcon from "@mui/icons-material/Person";
+import HomeIcon from "@mui/icons-material/Home";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useState, useRef, useEffect } from "react";
 import { Suspense } from "react";
 // Needed for markdown
@@ -187,7 +191,7 @@ function RouteComponent() {
                   variant="ghost"
                   className="rounded-full h-10 w-10 flex-shrink-0"
                 >
-                  <Home className="h-5 w-5" />
+                  <HomeIcon className="h-5 w-5" />
                 </Button>
               </Link>
 
@@ -212,9 +216,9 @@ function RouteComponent() {
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-primary hover:bg-primary/90 transition-all"
                 >
                   {processing ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-white" />
+                    <CircularProgress size={20} className="text-white" />
                   ) : (
-                    <Send className="h-5 w-5 text-white" />
+                    <SendIcon className="h-5 w-5 text-white" />
                   )}
                 </Button>
               </div>
@@ -246,9 +250,9 @@ function Chat({ message }: { message: ChatPayload["messages"][number] }) {
           )}
         >
           {isUser ? (
-            <User className="h-5 w-5 text-primary" />
+            <PersonIcon className="h-5 w-5 text-primary" />
           ) : (
-            <Bot className="h-5 w-5 text-secondary " color="white" />
+            <SmartToyIcon className="h-5 w-5 text-white" />
           )}
         </div>
 
