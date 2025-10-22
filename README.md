@@ -69,9 +69,6 @@ pnpm tsx server.ts
 ```bash
 git clone https://github.com/sriail/EmeraldModern.git
 cd EmeraldModern
-cp .env.example .env
-nano .env  # or vim, code, etc.
-OPENROUTER_API_KEY=your_actual_api_key_here
-PORT=3000
-NODE_ENV=production
+pnpm i
+pnpm bstart
 ```
