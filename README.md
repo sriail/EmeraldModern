@@ -51,10 +51,10 @@ export default tseslint.config({
 })
 ```
 
-## Depoyment Steps
+# Depoyment Steps
 To deploy Nova, you have many diffrent options depending on where you want to deploy it.
 
-# Deploy Via Pnpm
+## Deploy Via Pnpm
 
 Use `pnmp` to deploy localy or to VPS
 ```bash
@@ -64,7 +64,7 @@ pnpm i
 pnpm bstart
 ```
 
-# Deploy Via Docker
+## Deploy Via Docker
 
 ```bash
 git clone https://github.com/sriail/EmeraldModern.git
