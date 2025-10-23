@@ -1,4 +1,6 @@
-## Nova
+# Nova
+Nova is a sleak, clean, and modern web proxy system based on the symplisity of rammerhead and the backend of emerald for a clean, simple, browser like in-browser search experence with easy deployment.
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
