@@ -8,8 +8,10 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 ## Expanding the ESLint configuration
+> [!IMPORTANT]
+> `parserOptions` Has already be preconfiged for this production version. For Product, please keep it in the current state, for future development and forking, hear is the defult.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+If you are developing a production application, you can change the configuration to enable type aware lint rules:
 
 - Configure the top-level `parserOptions` property like this:
 
