@@ -56,14 +56,12 @@ To deploy Nova, you have many diffrent options depending on where you want to de
 
 # Deploy Via Pnpm
 
+Use `pnmp` to deploy localy or to VPS
 ```bash
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-PORT=3000
-git clone https://github.com/sriail/Nova
-cd Nova
+git clone https://github.com/sriail/EmeraldModern.git
+cd EmeraldModern
 pnpm i
-pnpm build
-pnpm tsx server.ts
+pnpm bstart
 ```
 
 # Deploy Via Docker
