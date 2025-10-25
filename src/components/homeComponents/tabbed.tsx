@@ -1141,83 +1141,147 @@ useEffect(() => {
     }
   };
 
-return (
-  <div className="flex flex-col w-full h-screen overflow-hidden bg-background/95 backdrop-blur-sm">
-    {/* Tab bar */}
-    <div className="flex items-center bg-background/80 backdrop-blur-md border-b border-border/40 h-12 px-1">
-      <div
-        ref={tabBarRef}
-        className="flex-1 flex items-center overflow-x-auto overflow-y-hidden h-full"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {tabs.map((tab, index) => (
-          <motion.div
-            key={tab.id}
-            data-tab-id={tab.id}
-            onClick={() => activateTab(tab.id)}
-            draggable
-            onDragStart={(e) =>
-              // @ts-expect-error blerb
-              settingsStore.allowTabReordering && handleDragStart(e, tab.id)
-            }
-            onDragOver={(e) => handleDragOver(e, tab.id)}
-            onDragEnd={handleDragEnd}
-            className={cn(
-              "flex-shrink-0 flex items-center justify-between px-4 relative text-sm transition-all cursor-pointer group",
-              tab.isActive
-                ? "bg-card text-card-foreground z-20"
-                : "bg-muted/40 text-muted-foreground hover:bg-muted/60 z-10",
-              draggedTabId === tab.id && "opacity-50"
-            )}
-            style={{
-              // Chrome-like trapezoidal shape
-              clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
-              borderRadius: "8px 8px 0 0",
-              marginTop: tab.isActive ? "2px" : "6px",
-              marginRight: index === tabs.length - 1 ? "0px" : "-16px",
-              height: tab.isActive ? "34px" : "30px",
-              paddingBottom: tab.isActive ? "0px" : "2px",
-              boxShadow: tab.isActive 
-                ? "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)"
-                : "none",
-              ...(!tab.isActive && index < tabs.length - 1 && !tabs[index + 1].isActive
-                ? { borderRight: "1px solid rgba(0, 0, 0, 0.08)" }
-                : {}
-              ),
-              transition: "all 0.15s ease",
-            }}
-            initial={{ opacity: 0.8, y: 4 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0,
-              scale: tab.isActive ? 1 : 0.98,
-            }}
-            transition={{ duration: 0.15 }}
-            layout
-          >
-            {/* Chrome-style gradient overlay for active tab */}
-            {tab.isActive && (
-              <div 
-                className="absolute inset-0 pointer-events-none opacity-5"
-                style={{
-                  clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
-                  background: "linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)",
-                }}
-              />
-            )}
-            
-            <div className="flex items-center overflow-hidden mr-2 relative z-10">
-              {tab.favicon ? (
-                <img
-                  src={tab.favicon}
-                  alt=""
-                  className="w-4 h-4 mr-2 flex-shrink-0"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
+  return (
+    <div className="flex flex-col w-full h-screen overflow-hidden bg-background/95 backdrop-blur-sm">
+      {/* Tab bar */}
+      <div className="flex items-center bg-background/80 backdrop-blur-md border-b border-border/40 h-12 px-1">
+        <div
+          ref={tabBarRef}
+          className="flex-1 flex items-center overflow-x-auto overflow-y-hidden h-full"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {tabs.map((tab, index) => (
+            <motion.div
+              key={tab.id}
+              data-tab-id={tab.id}
+              onClick={() => activateTab(tab.id)}
+              draggable
+              onDragStart={(e) =>
+                // @ts-expect-error blerb
+                settingsStore.allowTabReordering && handleDragStart(e, tab.id)
+              }
+              onDragOver={(e) => handleDragOver(e, tab.id)}
+              onDragEnd={handleDragEnd}
+              className={cn(
+                "flex-shrink-0 flex items-center justify-between px-4 relative text-sm transition-all cursor-pointer group",
+                tab.isActive
+                  ? "bg-card text-card-foreground z-20"
+                  : "bg-muted/40 text-muted-foreground hover:bg-muted/60 z-10",
+                draggedTabId === tab.id && "opacity-50"
+              )}
+              style={{
+                clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
+                borderRadius: "8px 8px 0 0",
+                marginTop: tab.isActive ? "2px" : "6px",
+                marginRight: index === tabs.length - 1 ? "0px" : "-16px",
+                height: tab.isActive ? "34px" : "30px",
+                paddingBottom: tab.isActive ? "0px" : "2px",
+                boxShadow: tab.isActive 
+                  ? "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)"
+                  : "none",
+                ...(!tab.isActive && index < tabs.length - 1 && !tabs[index + 1].isActive
+                  ? { borderRight: "1px solid rgba(0, 0, 0, 0.08)" }
+                  : {}
+                ),
+                transition: "all 0.15s ease",
+              }}
+              initial={{ opacity: 0.8, y: 4 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                scale: tab.isActive ? 1 : 0.98,
+              }}
+              transition={{ duration: 0.15 }}
+              layout
+            >
+              {tab.isActive && (
+                <div 
+                  className="absolute inset-0 pointer-events-none opacity-5"
+                  style={{
+                    clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
+                    background: "linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)",
+                  }}
                 />
-              ) : (
+              )}
+              
+              <div className="flex items-center overflow-hidden mr-2 relative z-10">
+                {tab.favicon ? (
+                  <img
+                    src={tab.favicon}
+                    alt=""
+                    className="w-4 h-4 mr-2 flex-shrink-0"
+                    onError={(e) => (e.currentTarget.style.display = "none")}
+                  />
+                ) : (
+                  !tab.url.startsWith("about:") && (
+                    <div className="w-4 h-4 mr-2 flex-shrink-0 rounded-sm bg-primary/10 flex items-center justify-center">
+                      <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
+                    </div>
+                  )
+                )}
+                <span className="truncate font-medium text-xs">
+                  {tab.title}
+                </span>
+              </div>
+              
+              <button
+                onClick={(e) => closeTab(tab.id, e)}
+                className={cn(
+                  "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
+                  tab.isActive 
+                    ? "opacity-70 hover:opacity-100" 
+                    : "opacity-0 group-hover:opacity-70"
+                )}
+              >
+                <CloseIcon sx={{ fontSize: 13 }} />
+              </button>
+            </motion.div>
+          ))}
+          
+          <button
+            onClick={addTab}
+            className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
+            title="New tab"
+          >
+            <AddIcon sx={{ fontSize: 16 }} />
+          </button>
+        </div>
+      </div>
+      
                 !tab.url.startsWith("about:") && (
                   <div className="w-4 h-4 mr-2 flex-shrink-0 rounded-sm bg-primary/10 flex items-center justify-center">
                     <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
+                  </div>
+                )
+              )}
+              <span className="truncate font-medium text-xs">
+                {tab.title}
+              </span>
+            </div>
+            
+            <button
+              onClick={(e) => closeTab(tab.id, e)}
+              className={cn(
+                "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
+                tab.isActive 
+                  ? "opacity-70 hover:opacity-100" 
+                  : "opacity-0 group-hover:opacity-70"
+              )}
+            >
+              <CloseIcon sx={{ fontSize: 13 }} />
+            </button>
+          </motion.div>
+        ))}
+        
+        <button
+          onClick={addTab}
+          className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
+          title="New tab"
+        >
+          <AddIcon sx={{ fontSize: 16 }} />
+        </button>
+      </div>
+    </div>
                   </div>
                 )
               )}
