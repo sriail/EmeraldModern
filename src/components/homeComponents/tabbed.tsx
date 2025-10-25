@@ -947,6 +947,29 @@ const TabbedHome = () => {
       window.removeEventListener("message", handleMessage);
     };
   }, []); 
+useEffect(() => {
+  const handleNewTabRequest = (event: MessageEvent) => {
+    if (event.data?.type === "openNewTab" && event.data?.url) {
+      const url = event.data.url;
+      const newTab: Tab = {
+        id: `tab-${Date.now()}`,
+        title: "Loading...",
+        url: url,
+        favicon: "",
+        isActive: true,
+      };
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+      );
+      setInputUrl(url);
+    }
+  };
+
+  window.addEventListener("message", handleNewTabRequest);
+  return () => {
+    window.removeEventListener("message", handleNewTabRequest);
+  };
+}, []);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
