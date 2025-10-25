@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import FullscreenIcon from "@mui/icons-material/Fullscreen";
-import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import SettingsIcon from "@mui/icons-material/Settings";
-import SearchIcon from "@mui/icons-material/Search";
-import HomeIcon from "@mui/icons-material/Home";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+import {
+  X,
+  Plus,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Search,
+  Home,
+  Bookmark,
+} from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import { cn } from "@/lib/utils";
 import GridPattern from "../ui/grid-pattern";
@@ -169,7 +171,7 @@ const SettingsPage = () => {
                   <Card className="border-border/30 bg-card/80 backdrop-blur-xl shadow-lg rounded-xl overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent pb-6">
                       <CardTitle className="text-xl flex items-center gap-2">
-                        <SettingsIcon className="h-5 w-5 text-primary" />
+                        <Settings className="h-5 w-5 text-primary" />
                         Appearance
                       </CardTitle>
                       <CardDescription>
@@ -290,7 +292,7 @@ const SettingsPage = () => {
                 <Card className="border-border/30 bg-card/80 backdrop-blur-xl shadow-lg rounded-xl overflow-hidden">
                   <CardHeader className="bg-gradient-to-r from-green-500/10 to-transparent pb-6">
                     <CardTitle className="text-xl flex items-center gap-2">
-                      <SearchIcon className="h-5 w-5 text-green-500" />
+                      <Search className="h-5 w-5 text-green-500" />
                       Search Engine
                     </CardTitle>
                     <CardDescription>
@@ -902,74 +904,8 @@ const TabbedHome = () => {
     return () => {
       Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
     };
-  }, [tabs]);  // ← This closes the FIRST useEffect (REMOVE the duplicate at the end)
+  }, [tabs]);
 
-  // Handle pointer lock for iframes
-  useEffect(() => {  // ← This starts the SECOND useEffect
-    const handlePointerLockChange = () => {
-      // Forward pointer lock state to all iframes
-      Object.values(iframeRefs.current).forEach((iframe) => {
-        if (iframe?.contentWindow) {
-          try {
-            if (document.pointerLockElement) {
-              iframe.contentWindow.postMessage(
-                { type: "pointerlock", locked: true },
-                "*"
-              );
-            } else {
-              iframe.contentWindow.postMessage(
-                { type: "pointerlock", locked: false },
-                "*"
-              );
-            }
-          } catch (error) {
-            console.error("Error communicating pointer lock state:", error);
-          }
-        }
-      });
-    };
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "requestPointerLock") {
-        try {
-          document.body.requestPointerLock();
-        } catch (error) {
-          console.error("Error requesting pointer lock:", error);
-        }
-      }
-    };
-
-    document.addEventListener("pointerlockchange", handlePointerLockChange);
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      document.removeEventListener("pointerlockchange", handlePointerLockChange);
-      window.removeEventListener("message", handleMessage);
-    };
-  }, []); 
-useEffect(() => {
-  const handleNewTabRequest = (event: MessageEvent) => {
-    if (event.data?.type === "openNewTab" && event.data?.url) {
-      const url = event.data.url;
-      const newTab: Tab = {
-        id: `tab-${Date.now()}`,
-        title: "Loading...",
-        url: url,
-        favicon: "",
-        isActive: true,
-      };
-      setTabs((prevTabs) =>
-        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
-      );
-      setInputUrl(url);
-    }
-  };
-
-  window.addEventListener("message", handleNewTabRequest);
-  return () => {
-    window.removeEventListener("message", handleNewTabRequest);
-  };
-}, []);
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
@@ -1150,7 +1086,7 @@ useEffect(() => {
           className="flex-1 flex items-center overflow-x-auto overflow-y-hidden h-full"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {tabs.map((tab, index) => (
+          {tabs.map((tab) => (
             <motion.div
               key={tab.id}
               data-tab-id={tab.id}
@@ -1163,48 +1099,18 @@ useEffect(() => {
               onDragOver={(e) => handleDragOver(e, tab.id)}
               onDragEnd={handleDragEnd}
               className={cn(
-                "flex-shrink-0 flex items-center justify-between px-4 relative text-sm transition-all cursor-pointer group",
+                "flex-shrink-0 flex items-center justify-between h-9 px-3 relative rounded-t-lg mr-1 text-sm transition-all cursor-pointer group",
                 tab.isActive
-                  ? "bg-card text-card-foreground z-20"
-                  : "bg-muted/40 text-muted-foreground hover:bg-muted/60 z-10",
+                  ? "bg-card text-card-foreground shadow-sm z-10"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted/80 mt-1",
                 draggedTabId === tab.id && "opacity-50"
               )}
-              style={{
-                clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
-                borderRadius: "8px 8px 0 0",
-                marginTop: tab.isActive ? "2px" : "6px",
-                marginRight: index === tabs.length - 1 ? "0px" : "-16px",
-                height: tab.isActive ? "34px" : "30px",
-                paddingBottom: tab.isActive ? "0px" : "2px",
-                boxShadow: tab.isActive 
-                  ? "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)"
-                  : "none",
-                ...(!tab.isActive && index < tabs.length - 1 && !tabs[index + 1].isActive
-                  ? { borderRight: "1px solid rgba(0, 0, 0, 0.08)" }
-                  : {}
-                ),
-                transition: "all 0.15s ease",
-              }}
               initial={{ opacity: 0.8, y: 4 }}
-              animate={{ 
-                opacity: 1, 
-                y: 0,
-                scale: tab.isActive ? 1 : 0.98,
-              }}
+              animate={{ opacity: 1, y: tab.isActive ? 0 : 4 }}
               transition={{ duration: 0.15 }}
               layout
             >
-              {tab.isActive && (
-                <div 
-                  className="absolute inset-0 pointer-events-none opacity-5"
-                  style={{
-                    clipPath: "polygon(12px 0%, calc(100% - 12px) 0%, calc(100% - 4px) 100%, 4px 100%)",
-                    background: "linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)",
-                  }}
-                />
-              )}
-              
-              <div className="flex items-center overflow-hidden mr-2 relative z-10">
+              <div className="flex items-center overflow-hidden mr-1">
                 {tab.favicon ? (
                   <img
                     src={tab.favicon}
@@ -1215,142 +1121,36 @@ useEffect(() => {
                 ) : (
                   !tab.url.startsWith("about:") && (
                     <div className="w-4 h-4 mr-2 flex-shrink-0 rounded-sm bg-primary/10 flex items-center justify-center">
-                      <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
+                      <Home size={10} className="text-primary" />
                     </div>
                   )
                 )}
-                <span className="truncate font-medium text-xs">
-                  {tab.title}
-                </span>
+                <span className="truncate font-medium">{tab.title}</span>
               </div>
-              
               <button
                 onClick={(e) => closeTab(tab.id, e)}
-                className={cn(
-                  "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
-                  tab.isActive 
-                    ? "opacity-70 hover:opacity-100" 
-                    : "opacity-0 group-hover:opacity-70"
-                )}
+                className="ml-1 p-0.5 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
               >
-                <CloseIcon sx={{ fontSize: 13 }} />
+                <X size={14} />
               </button>
+              {!tab.isActive && (
+                <div className="absolute right-0 top-1 bottom-1 w-px bg-border/30 group-hover:bg-transparent"></div>
+              )}
+              {tab.isActive && (
+                <motion.div
+                  className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-primary rounded-full"
+                  layoutId="activeTabIndicator"
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                ></motion.div>
+              )}
             </motion.div>
-          ))}
-          
-          <button
-            onClick={addTab}
-            className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
-            title="New tab"
-          >
-            <AddIcon sx={{ fontSize: 16 }} />
-          </button>
-        </div>
-      </div>
-      
-                !tab.url.startsWith("about:") && (
-                  <div className="w-4 h-4 mr-2 flex-shrink-0 rounded-sm bg-primary/10 flex items-center justify-center">
-                    <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
-                  </div>
-                )
-              )}
-              <span className="truncate font-medium text-xs">
-                {tab.title}
-              </span>
-            </div>
-            
-            <button
-              onClick={(e) => closeTab(tab.id, e)}
-              className={cn(
-                "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
-                tab.isActive 
-                  ? "opacity-70 hover:opacity-100" 
-                  : "opacity-0 group-hover:opacity-70"
-              )}
-            >
-              <CloseIcon sx={{ fontSize: 13 }} />
-            </button>
-          </motion.div>
-        ))}
-        
-        <button
-          onClick={addTab}
-          className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
-          title="New tab"
-        >
-          <AddIcon sx={{ fontSize: 16 }} />
-        </button>
-      </div>
-    </div>
-                  </div>
-                )
-              )}
-              <span className="truncate font-medium text-xs">
-                {tab.title}
-              </span>
-            </div>
-            
-            <button
-              onClick={(e) => closeTab(tab.id, e)}
-              className={cn(
-                "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
-                tab.isActive 
-                  ? "opacity-70 hover:opacity-100" 
-                  : "opacity-0 group-hover:opacity-70"
-              )}
-            >
-              <CloseIcon sx={{ fontSize: 13 }} />
-            </button>
-          </motion.div>
-        ))}
-        
-        <button
-          onClick={addTab}
-          className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
-          title="New tab"
-        >
-          <AddIcon sx={{ fontSize: 16 }} />
-        </button>
-      </div>
-    </div>
-              <HomeIcon sx={{ fontSize: 10 }} className="text-primary" />
-            </div>
-          )
-        )}
-        <span className="truncate font-medium text-xs">
-          {tab.title}
-        </span>
-      </div>
-      
-      <button
-        onClick={(e) => closeTab(tab.id, e)}
-        className={cn(
-          "ml-1 p-1 rounded-full hover:bg-muted-foreground/20 flex-shrink-0 transition-all relative z-10",
-          tab.isActive 
-            ? "opacity-70 hover:opacity-100" 
-            : "opacity-0 group-hover:opacity-70 group-hover:hover:opacity-100"
-        )}
-      >
-        <CloseIcon sx={{ fontSize: 13 }} />
-      </button>
-    </motion.div>
-  ))}
-  
-  <button
-    onClick={addTab}
-    className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-2 transition-colors z-30"
-    title="New tab"
-  >
-    <AddIcon sx={{ fontSize: 16 }} />
-  </button>
-</div>
           ))}
           <button
             onClick={addTab}
             className="flex-shrink-0 flex items-center justify-center w-8 h-8 min-w-[32px] rounded-full hover:bg-muted ml-1 transition-colors"
             title="New tab"
           >
-            <AddIcon sx={{ fontSize: 16 }} />
+            <Plus size={16} />
           </button>
         </div>
       </div>
@@ -1363,27 +1163,27 @@ useEffect(() => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Go back"
           >
-            <ChevronLeftIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+            <ChevronLeft size={18} className="text-foreground/70" />
           </button>
           <button
             onClick={goForward}
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Go forward"
           >
-            <ChevronRightIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+            <ChevronRight size={18} className="text-foreground/70" />
           </button>
           <button
             onClick={refreshPage}
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors disabled:opacity-50"
             title="Reload page"
           >
-            <RefreshIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+            <RotateCcw size={18} className="text-foreground/70" />
           </button>
         </div>
 
         <form onSubmit={handleUrlSubmit} className="flex-1 relative group mx-2">
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground z-10 pointer-events-none">
-            <SearchIcon sx={{ fontSize: 16 }} />
+            <Search size={16} />
           </div>
           <Input
             ref={urlInputRef}
@@ -1404,7 +1204,7 @@ useEffect(() => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors"
             title="Add bookmark"
           >
-            <BookmarkIcon sx={{ fontSize: 18 }} className="text-foreground/70" />{" "}
+            <Bookmark size={18} className="text-foreground/70" />{" "}
           </button>
           <button
             onClick={toggleFullscreen}
@@ -1412,9 +1212,9 @@ useEffect(() => {
             title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           >
             {isFullscreen ? (
-              <FullscreenExitIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+              <Minimize size={18} className="text-foreground/70" />
             ) : (
-              <FullscreenIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+              <Maximize size={18} className="text-foreground/70" />
             )}
           </button>
           <button
@@ -1422,7 +1222,7 @@ useEffect(() => {
             className="p-1.5 rounded-full hover:bg-muted/80 transition-colors"
             title="Settings"
           >
-            <SettingsIcon sx={{ fontSize: 18 }} className="text-foreground/70" />
+            <Settings size={18} className="text-foreground/70" />
           </button>
         </div>
       </div>
@@ -1443,19 +1243,19 @@ useEffect(() => {
                   <SettingsPage />
                 </div>
               ) : tab.url ? (
-               <iframe
-  ref={(el) => {
-    if (el) iframeRefs.current[tab.id] = el;
-  }}
-  src={
-    tab.url
-      ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
-      : ""
-  }
-  className="w-full h-full border-0"
-  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-  title={tab.title}
-/>
+                <iframe
+                  ref={(el) => {
+                    if (el) iframeRefs.current[tab.id] = el;
+                  }}
+                  src={
+                    tab.url
+                      ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
+                      : ""
+                  }
+                  className="w-full h-full border-0"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation"
+                  title={tab.title}
+                />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-start pt-20 bg-gradient-to-b from-background to-background/80 overflow-auto">
                   <GridPattern
@@ -1494,7 +1294,7 @@ useEffect(() => {
                         className="relative group"
                       >
                         <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">
-                          <SearchIcon sx={{ fontSize: 20 }} />
+                          <Search size={20} />
                         </div>
                         <Input
                           type="text"
@@ -1512,7 +1312,7 @@ useEffect(() => {
                           className="absolute right-2.5 top-1/2 transform -translate-y-1/2 bg-primary/90 hover:bg-primary text-primary-foreground rounded-full p-2 transition-colors"
                           title="Go"
                         >
-                          <ChevronRightIcon sx={{ fontSize: 20 }} />
+                          <ChevronRight size={20} />
                         </button>
                       </form>
                     </motion.div>
