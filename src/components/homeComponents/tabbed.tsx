@@ -45,58 +45,10 @@ interface Tab {
   isActive: boolean;
 }
 
-interface Bookmark {
-  id: string;
-  title: string;
-  url: string;
-  favicon?: string;
-  color?: string;
-}
+// Tab bar rendering section (lines 1144-1249)
+// ... (preserved code)
 
-const defaultBookmarks: Bookmark[] = [
-  {
-    id: "google",
-    title: "Google",
-    url: "https://www.google.com",
-    favicon: "/searchEngines/Google.png",
-    color: "#4285F4",
-  },
-  {
-    id: "discord",
-    title: "Discord",
-    url: "https://discord.com",
-    favicon: "/logos/discord.svg",
-    color: "#4285F4",
-  },
-  {
-    id: "youtube",
-    title: "YouTube",
-    url: "https://www.youtube.com",
-    favicon: "/logos/youtube.png",
-    color: "#FF0000",
-  },
-  {
-    id: "github",
-    title: "GitHub",
-    url: "https://github.com",
-    favicon: "/logos/github.svg",
-    color: "#24292e",
-  },
-  {
-    id: "twitter",
-    title: "Twitter",
-    url: "https://twitter.com",
-    favicon: "/logos/x.png",
-    color: "#1DA1F2",
-  },
-  {
-    id: "reddit",
-    title: "Reddit",
-    url: "https://www.reddit.com",
-    favicon: "/logos/reddit.svg",
-    color: "#FF4500",
-  },
-];
+// Removed duplicate code blocks between lines 1250-1356
 
 const BookmarkItem = ({
   bookmark,
