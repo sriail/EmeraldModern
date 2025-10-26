@@ -936,7 +936,7 @@ const TabbedHome = () => {
       cleanupFunctions[tab.id] = () => {
         iframe.removeEventListener("load", handleIframeLoad);
       };
-    });
+    };
 
     return () => {
       Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
