@@ -850,7 +850,8 @@ useEffect(() => {
     const iframe = iframeRefs.current[tab.id];
     if (!iframe) return;
 
-      // EXISTING CODE: Update title and favicon (lines 854-893)
+    const handleIframeLoad = () => {
+      // Update title and favicon
       try {
         if (iframe.contentWindow && iframe.contentWindow.document) {
           const iframeDocument = iframe.contentWindow.document;
@@ -891,9 +892,20 @@ useEffect(() => {
           )
         );
       }
+      
+      // Inject popup interception script
+      try {
+        if (iframe.contentWindow && iframe.contentDocument) {
+          const script = iframe.contentDocument.createElement('script');
+          script.src = `/scram/${settingsStore.proxy}-inject.js`;
+          iframe.contentDocument.head?.appendChild(script);
+          console.log(`Injected ${settingsStore.proxy} popup script`);
+        }
+      } catch (error) {
+        console.warn('Could not inject popup script (likely CORS):', error);
+      }
     };
 
-    // EXISTING CODE continues (line 896)
     iframe.addEventListener("load", handleIframeLoad);
     cleanupFunctions[tab.id] = () => {
       iframe.removeEventListener("load", handleIframeLoad);
@@ -903,6 +915,7 @@ useEffect(() => {
   return () => {
     Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
   };
+}, [tabs]);
 }, [tabs]);
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
