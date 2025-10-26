@@ -850,26 +850,6 @@ useEffect(() => {
     const iframe = iframeRefs.current[tab.id];
     if (!iframe) return;
 
-    const handleIframeLoad = () => {
-  // EXISTING CODE: Update title and favicon (lines 854-893)
-  try {
-    // ... existing title/favicon code ...
-  } catch (error) {
-    // ... existing error handling ...
-  }
-  
-  // ADD THIS: Inject popup interception script
-  try {
-    if (iframe.contentWindow && iframe.contentDocument) {
-      const script = iframe.contentDocument.createElement('script');
-      script.src = `/scram/${settingsStore.proxy}-inject.js`; // Will load scramjet-inject.js or uv-inject.js
-      iframe.contentDocument.head?.appendChild(script);
-      console.log(`Injected ${settingsStore.proxy} popup script`);
-    }
-  } catch (error) {
-    console.warn('Could not inject popup script (likely CORS):', error);
-  }
-};
       // EXISTING CODE: Update title and favicon (lines 854-893)
       try {
         if (iframe.contentWindow && iframe.contentWindow.document) {
@@ -930,6 +910,61 @@ useEffect(() => {
       // Forward pointer lock state to all iframes
       Object.values(iframeRefs.current).forEach((iframe) => {
         if (iframe?.contentWindow) {
+          const handleIframeLoad = () => {
+  // Update title and favicon
+  try {
+    if (iframe.contentWindow && iframe.contentWindow.document) {
+      const iframeDocument = iframe.contentWindow.document;
+      const pageTitle = iframeDocument.title;
+      let pageFavicon = "";
+
+      const faviconLink = iframeDocument.querySelector(
+        "link[rel='icon'], link[rel='shortcut icon']"
+      ) as HTMLLinkElement;
+      if (faviconLink) {
+        pageFavicon = faviconLink.href;
+      }
+      setTabs((prevTabs) =>
+        prevTabs.map((prevTab) =>
+          prevTab.id === tab.id
+            ? {
+                ...prevTab,
+                title: pageTitle || prevTab.title,
+                favicon: pageFavicon || prevTab.favicon,
+              }
+            : prevTab
+        )
+      );
+    }
+  } catch (error) {
+    console.warn(
+      `Could not access iframe content for title/favicon update (tab ${tab.id}):`,
+      error
+    );
+    setTabs((prevTabs) =>
+      prevTabs.map((prevTab) =>
+        prevTab.id === tab.id && !prevTab.title.includes(".")
+          ? {
+              ...prevTab,
+              title: prevTab.url.split("/")[2] || prevTab.url,
+            }
+          : prevTab
+      )
+    );
+  }
+  
+  // Inject popup interception script
+  try {
+    if (iframe.contentWindow && iframe.contentDocument) {
+      const script = iframe.contentDocument.createElement('script');
+      script.src = `/scram/${settingsStore.proxy}-inject.js`;
+      iframe.contentDocument.head?.appendChild(script);
+      console.log(`Injected ${settingsStore.proxy} popup script`);
+    }
+  } catch (error) {
+    console.warn('Could not inject popup script (likely CORS):', error);
+  }
+};
           try {
             if (document.pointerLockElement) {
               iframe.contentWindow.postMessage(
