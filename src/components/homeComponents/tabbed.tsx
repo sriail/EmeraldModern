@@ -892,38 +892,6 @@ useEffect(() => {
           )
         );
       }
-    
-      try {
-        const iframeWindow = iframe.contentWindow;
-        if (iframeWindow && !(iframeWindow as any).__openIntercepted) {
-          const originalOpen = iframeWindow.open.bind(iframeWindow);
-          iframeWindow.open = function(url?: string | URL, target?: string, features?: string) {
-            if (url && target !== '_self') {
-              const urlString = url.toString();
-              
-              // Send message to parent to create new tab
-              window.postMessage({ type: 'openInNewTab', url: urlString }, '*');
-              
-              // Return a dummy window object to prevent errors
-              return {
-                closed: false,
-                close: () => {},
-                focus: () => {},
-                blur: () => {},
-                postMessage: () => {},
-              } as any;
-            }
-            // For _self or no URL, use original behavior
-            return originalOpen(url, target, features);
-          };
-          (iframeWindow as any).__openIntercepted = true;
-        }
-      } catch (error) {
-        console.warn(
-          `Could not intercept window.open for tab ${tab.id}:`,
-          error
-        );
-      }
     };
 
     // EXISTING CODE continues (line 896)
