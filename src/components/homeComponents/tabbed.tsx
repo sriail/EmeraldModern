@@ -1334,7 +1334,7 @@ useEffect(() => {
       : ""
   }
   className="w-full h-full border-0"
-  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+  sandbox="allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
   title={tab.title}
 />
               ) : (
