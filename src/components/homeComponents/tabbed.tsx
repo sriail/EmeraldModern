@@ -937,45 +937,6 @@ useEffect(() => {
     Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
   };
 }, [tabs]);
-
-  // Intercept popup/new window requests from iframes
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      console.log('Message received:', event.data); // DEBUG
-      
-      // Listen for window.open requests from proxied content
-      if (event.data && event.data.type === 'openInNewTab') {
-        let url = event.data.url;
-        console.log('Opening in new tab:', url); // DEBUG
-        
-        if (url) {
-          // Check if URL is already proxy-encoded (starts with proxy prefix)
-          if (url.startsWith('/~/scramjet/') || url.startsWith('/~/uv/')) {
-            // Extract the actual URL from the proxy path
-            const proxyPrefix = url.startsWith('/~/scramjet/') ? '/~/scramjet/' : '/~/uv/';
-            url = decodeURIComponent(url.substring(proxyPrefix.length));
-            console.log('Decoded URL:', url); // DEBUG
-          }
-          
-          const newTab: Tab = {
-            id: `tab-${Date.now()}`,
-            title: "Loading...",
-            url: url,
-            favicon: "",
-            isActive: true,
-          };
-          setTabs((prevTabs) =>
-            prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
-          );
-          setInputUrl(url);
-        }
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
-  
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
     const handlePointerLockChange = () => {
