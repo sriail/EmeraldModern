@@ -943,8 +943,15 @@ useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Listen for window.open requests from proxied content
       if (event.data && event.data.type === 'openInNewTab') {
-        const url = event.data.url;
+        let url = event.data.url;
         if (url) {
+          // Check if URL is already proxy-encoded (starts with proxy prefix)
+          if (url.startsWith('/~/scramjet/') || url.startsWith('/~/uv/')) {
+            // Extract the actual URL from the proxy path
+            const proxyPrefix = url.startsWith('/~/scramjet/') ? '/~/scramjet/' : '/~/uv/';
+            url = decodeURIComponent(url.substring(proxyPrefix.length));
+          }
+          
           const newTab: Tab = {
             id: `tab-${Date.now()}`,
             title: "Loading...",
