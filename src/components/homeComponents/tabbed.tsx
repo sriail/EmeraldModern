@@ -892,35 +892,30 @@ useEffect(() => {
           )
         );
       }
-
-      // ✅ ADD THIS NEW CODE HERE (after line 893)
-      // Intercept window.open to prevent new browser tabs
+    
       try {
         const iframeWindow = iframe.contentWindow;
         if (iframeWindow && !(iframeWindow as any).__openIntercepted) {
           const originalOpen = iframeWindow.open.bind(iframeWindow);
           iframeWindow.open = function(url?: string | URL, target?: string, features?: string) {
-            // If a URL is provided, create a new tab in the internal system
-            if (url) {
+            if (url && target !== '_self') {
               const urlString = url.toString();
-              const newTab: Tab = {
-                id: `tab-${Date.now()}`,
-                title: "Loading...",
-                url: urlString,
-                favicon: "",
-                isActive: true,
-              };
-              setTabs((prevTabs) =>
-                prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
-              );
-              setInputUrl(urlString);
-              // Return null to indicate no window was opened
-              return null as any;
+              
+              // Send message to parent to create new tab
+              window.postMessage({ type: 'openInNewTab', url: urlString }, '*');
+              
+              // Return a dummy window object to prevent errors
+              return {
+                closed: false,
+                close: () => {},
+                focus: () => {},
+                blur: () => {},
+                postMessage: () => {},
+              } as any;
             }
-            // Fall back to original behavior for edge cases
+            // For _self or no URL, use original behavior
             return originalOpen(url, target, features);
           };
-          // Mark this window as intercepted to avoid double-wrapping
           (iframeWindow as any).__openIntercepted = true;
         }
       } catch (error) {
@@ -929,7 +924,6 @@ useEffect(() => {
           error
         );
       }
-      // ✅ END OF NEW CODE
     };
 
     // EXISTING CODE continues (line 896)
@@ -943,6 +937,32 @@ useEffect(() => {
     Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
   };
 }, [tabs]);
+
+  // Intercept popup/new window requests from iframes
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Listen for window.open requests from proxied content
+      if (event.data && event.data.type === 'openInNewTab') {
+        const url = event.data.url;
+        if (url) {
+          const newTab: Tab = {
+            id: `tab-${Date.now()}`,
+            title: "Loading...",
+            url: url,
+            favicon: "",
+            isActive: true,
+          };
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+          );
+          setInputUrl(url);
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
