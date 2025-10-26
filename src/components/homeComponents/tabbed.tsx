@@ -922,8 +922,7 @@ useEffect(() => {
       // Forward pointer lock state to all iframes
       Object.values(iframeRefs.current).forEach((iframe) => {
         if (iframe?.contentWindow) {
-          const handleIframeLoad = () => {
-            
+
           try {
             if (document.pointerLockElement) {
               iframe.contentWindow.postMessage(
