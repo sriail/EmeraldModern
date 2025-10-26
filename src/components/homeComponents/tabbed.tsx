@@ -1432,6 +1432,6 @@ const TabbedHome = () => {
       </div>
     </div>
   );
-};
+})
 
 export default TabbedHome;
