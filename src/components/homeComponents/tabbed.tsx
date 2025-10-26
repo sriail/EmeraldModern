@@ -851,6 +851,25 @@ useEffect(() => {
     if (!iframe) return;
 
     const handleIframeLoad = () => {
+  // EXISTING CODE: Update title and favicon (lines 854-893)
+  try {
+    // ... existing title/favicon code ...
+  } catch (error) {
+    // ... existing error handling ...
+  }
+  
+  // ADD THIS: Inject popup interception script
+  try {
+    if (iframe.contentWindow && iframe.contentDocument) {
+      const script = iframe.contentDocument.createElement('script');
+      script.src = `/scram/${settingsStore.proxy}-inject.js`; // Will load scramjet-inject.js or uv-inject.js
+      iframe.contentDocument.head?.appendChild(script);
+      console.log(`Injected ${settingsStore.proxy} popup script`);
+    }
+  } catch (error) {
+    console.warn('Could not inject popup script (likely CORS):', error);
+  }
+};
       // EXISTING CODE: Update title and favicon (lines 854-893)
       try {
         if (iframe.contentWindow && iframe.contentWindow.document) {
