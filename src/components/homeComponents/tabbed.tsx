@@ -947,7 +947,42 @@ useEffect(() => {
       document.removeEventListener("pointerlockchange", handlePointerLockChange);
       window.removeEventListener("message", handleMessage);
     };
-  }, []); 
+  }, []);
+    // Monitor iframe navigation for popup attempts
+  useEffect(() => {
+    const handleNavigation = (event: MessageEvent) => {
+      // UV and Scramjet can send navigation events via postMessage
+      if (event.data && event.data.type === 'navigate') {
+        console.log('Navigation detected:', event.data);
+        
+        // If it's a new window/popup request
+        if (event.data.newWindow || event.data.target === '_blank') {
+          const url = event.data.url;
+          
+          // Create new internal tab instead
+          const newTab: Tab = {
+            id: `tab-${Date.now()}`,
+            title: "Loading...",
+            url: url,
+            favicon: "",
+            isActive: true,
+          };
+          setTabs((prevTabs) =>
+            prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+          );
+          setInputUrl(url);
+          
+          // Prevent the actual popup
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    };
+
+    window.addEventListener('message', handleNavigation);
+    return () => window.removeEventListener('message', handleNavigation);
+  }, []);
+  
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
