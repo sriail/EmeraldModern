@@ -841,68 +841,108 @@ const TabbedHome = () => {
     }
   };
 
-  useEffect(() => {
-    const cleanupFunctions: { [tabId: string]: () => void } = {};
+useEffect(() => {
+  const cleanupFunctions: { [tabId: string]: () => void } = {};
 
-    tabs.forEach((tab) => {
-      if (!tab.url || tab.url.startsWith("about:")) return; // No need for listener on blank or internal tabs
+  tabs.forEach((tab) => {
+    if (!tab.url || tab.url.startsWith("about:")) return;
 
-      const iframe = iframeRefs.current[tab.id];
-      if (!iframe) return;
+    const iframe = iframeRefs.current[tab.id];
+    if (!iframe) return;
 
-      const handleIframeLoad = () => {
-        try {
-          if (iframe.contentWindow && iframe.contentWindow.document) {
-            const iframeDocument = iframe.contentWindow.document;
-            const pageTitle = iframeDocument.title;
-            let pageFavicon = "";
+    const handleIframeLoad = () => {
+      // EXISTING CODE: Update title and favicon (lines 854-893)
+      try {
+        if (iframe.contentWindow && iframe.contentWindow.document) {
+          const iframeDocument = iframe.contentWindow.document;
+          const pageTitle = iframeDocument.title;
+          let pageFavicon = "";
 
-            const faviconLink = iframeDocument.querySelector(
-              "link[rel='icon'], link[rel='shortcut icon']"
-            ) as HTMLLinkElement;
-            if (faviconLink) {
-              pageFavicon = faviconLink.href;
-            }
-            setTabs((prevTabs) =>
-              prevTabs.map((prevTab) =>
-                prevTab.id === tab.id
-                  ? {
-                      ...prevTab,
-                      title: pageTitle || prevTab.title,
-                      favicon: pageFavicon || prevTab.favicon,
-                    }
-                  : prevTab
-              )
-            );
+          const faviconLink = iframeDocument.querySelector(
+            "link[rel='icon'], link[rel='shortcut icon']"
+          ) as HTMLLinkElement;
+          if (faviconLink) {
+            pageFavicon = faviconLink.href;
           }
-        } catch (error) {
-          console.warn(
-            `Could not access iframe content for title/favicon update (tab ${tab.id}):`,
-            error
-          );
           setTabs((prevTabs) =>
             prevTabs.map((prevTab) =>
-              prevTab.id === tab.id && !prevTab.title.includes(".")
+              prevTab.id === tab.id
                 ? {
                     ...prevTab,
-                    title: prevTab.url.split("/")[2] || prevTab.url,
+                    title: pageTitle || prevTab.title,
+                    favicon: pageFavicon || prevTab.favicon,
                   }
                 : prevTab
             )
           );
         }
-      };
+      } catch (error) {
+        console.warn(
+          `Could not access iframe content for title/favicon update (tab ${tab.id}):`,
+          error
+        );
+        setTabs((prevTabs) =>
+          prevTabs.map((prevTab) =>
+            prevTab.id === tab.id && !prevTab.title.includes(".")
+              ? {
+                  ...prevTab,
+                  title: prevTab.url.split("/")[2] || prevTab.url,
+                }
+              : prevTab
+          )
+        );
+      }
 
-      iframe.addEventListener("load", handleIframeLoad);
-      cleanupFunctions[tab.id] = () => {
-        iframe.removeEventListener("load", handleIframeLoad);
-      };
-    });
-
-    return () => {
-      Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
+      // ✅ ADD THIS NEW CODE HERE (after line 893)
+      // Intercept window.open to prevent new browser tabs
+      try {
+        const iframeWindow = iframe.contentWindow;
+        if (iframeWindow && !(iframeWindow as any).__openIntercepted) {
+          const originalOpen = iframeWindow.open.bind(iframeWindow);
+          iframeWindow.open = function(url?: string | URL, target?: string, features?: string) {
+            // If a URL is provided, create a new tab in the internal system
+            if (url) {
+              const urlString = url.toString();
+              const newTab: Tab = {
+                id: `tab-${Date.now()}`,
+                title: "Loading...",
+                url: urlString,
+                favicon: "",
+                isActive: true,
+              };
+              setTabs((prevTabs) =>
+                prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+              );
+              setInputUrl(urlString);
+              // Return null to indicate no window was opened
+              return null as any;
+            }
+            // Fall back to original behavior for edge cases
+            return originalOpen(url, target, features);
+          };
+          // Mark this window as intercepted to avoid double-wrapping
+          (iframeWindow as any).__openIntercepted = true;
+        }
+      } catch (error) {
+        console.warn(
+          `Could not intercept window.open for tab ${tab.id}:`,
+          error
+        );
+      }
+      // ✅ END OF NEW CODE
     };
-  }, [tabs]);  // ← This closes the FIRST useEffect (REMOVE the duplicate at the end)
+
+    // EXISTING CODE continues (line 896)
+    iframe.addEventListener("load", handleIframeLoad);
+    cleanupFunctions[tab.id] = () => {
+      iframe.removeEventListener("load", handleIframeLoad);
+    };
+  });
+
+  return () => {
+    Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
+  };
+}, [tabs]);
 
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
