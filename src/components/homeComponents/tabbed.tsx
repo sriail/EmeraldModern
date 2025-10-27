@@ -962,6 +962,52 @@ const TabbedHome = () => {
       }
     }
   };
+  
+useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    // Only process messages from same origin
+    if (event.origin !== window.location.origin) return;
+    
+    console.log('[Emerald] Received message:', event.data);
+    
+    if (event.data && event.data.type === 'PROXY_POPUP') {
+      console.log('[Emerald] Proxy popup detected:', event.data.url);
+      
+      let actualUrl = event.data.url;
+      
+      // Extract the real URL from the proxy URL
+      try {
+        const proxyMatch = actualUrl.match(/\/~\/(scramjet|uv)\/(.+)/);
+        if (proxyMatch) {
+          actualUrl = decodeURIComponent(proxyMatch[2]);
+          console.log('[Emerald] Extracted URL:', actualUrl);
+        }
+      } catch (e) {
+        console.warn('[Emerald] Could not extract URL:', e);
+      }
+      
+      // Create new internal tab
+      const newTab: Tab = {
+        id: `tab-${Date.now()}`,
+        title: "Loading...",
+        url: actualUrl,
+        favicon: "",
+        isActive: true,
+      };
+      
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+      );
+      setInputUrl(actualUrl);
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+  
+  return () => {
+    window.removeEventListener('message', handleMessage);
+  };
+}, []);
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     if (!settingsStore.allowTabReordering) return;
