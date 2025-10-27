@@ -33,34 +33,78 @@
 </script>
 
 <script>
-  // Global popup interceptor for Scramjet
+  // Enhanced popup interceptor - must run before React
   (function() {
+    console.log('[Emerald] Installing popup interceptor...');
+    
     const originalOpen = window.open;
     
+    // Override window.open at the parent level
     window.open = function(url, target, features) {
-      console.log('[Emerald Global] window.open called:', url, target, features);
+      console.log('[Emerald Global] window.open intercepted:', {
+        url: url,
+        target: target,
+        features: features,
+        stack: new Error().stack
+      });
       
-      // Check if this is a proxy URL trying to open in a new window
-      if (url && (url.includes('/~/scramjet/') || url.includes('/~/uv/'))) {
-        console.log('[Emerald Global] Proxy popup detected, sending to React');
+      // Check if this is a proxy URL
+      if (url && (url.includes('/~/scramjet/') || url.includes('/~/uv/') || url.includes('about:blank'))) {
+        console.log('[Emerald Global] Proxy popup detected!');
         
         // Send message to React app
-        window.postMessage({
-          type: 'PROXY_POPUP',
-          url: url,
-          target: target,
-          timestamp: Date.now()
-        }, '*');
+        setTimeout(() => {
+          window.postMessage({
+            type: 'PROXY_POPUP',
+            url: url,
+            target: target,
+            timestamp: Date.now()
+          }, window.location.origin);
+        }, 0);
         
-        // Block the popup
-        return null;
+        // Return a fake window object to prevent errors
+        return {
+          closed: false,
+          close: () => {},
+          focus: () => {},
+          blur: () => {},
+          postMessage: () => {}
+        };
       }
       
       // Allow other popups
-      return originalOpen.call(this, url, target, features);
+      console.log('[Emerald Global] Allowing non-proxy popup');
+      return originalOpen.call(window, url, target, features);
     };
     
-    console.log('[Emerald Global] Popup interceptor installed');
+    // Also monitor for messages FROM iframes
+    window.addEventListener('message', function(e) {
+      console.log('[Emerald] Message received:', e.data);
+      
+      // Scramjet might send messages when it tries to open popups
+      if (e.data && typeof e.data === 'object') {
+        if (e.data.type === 'open' || e.data.msg === 'open') {
+          console.log('[Emerald] Iframe requested popup:', e.data);
+          
+          window.postMessage({
+            type: 'PROXY_POPUP',
+            url: e.data.url || e.data.href,
+            target: '_blank',
+            timestamp: Date.now()
+          }, window.location.origin);
+        }
+      }
+    });
+    
+    console.log('[Emerald] Popup interceptor installed successfully!');
+    
+    // Test the interceptor immediately
+    setTimeout(() => {
+      console.log('[Emerald] Testing interceptor...');
+      const testResult = window.open('/~/scramjet/test', '_blank');
+      console.log('[Emerald] Test result:', testResult);
+    }, 1000);
+    
   })();
 </script>
     <script src="/uv/uv.bundle.js"></script>
