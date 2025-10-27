@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/emerald.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova (Emerald Beta)</title>
+    <title>Emerald ⭐</title>
     <meta
       name="description"
       content="The Emerald service, your one stop solution for all you're nefarious needs"
@@ -20,53 +20,16 @@
     <script src="/scram/scramjet.controller.js"></script>
     <script>
       const scramjet = new ScramjetController({
-  prefix: "/~/scramjet/",
-  files: {
-    wasm: "/scram/scramjet.wasm.wasm",
-    worker: "/scram/scramjet.worker.js",
-    client: "/scram/scramjet.client.js",
-    shared: "/scram/scramjet.shared.js",
-    sync: "/scram/scramjet.sync.js",
-  },
-  // Inject popup interception script
-  defaultFlags: {
-    serviceworkers: true,
-  },
-  codec: {
-    encode(url) {
-      return encodeURIComponent(url);
-    },
-    decode(url) {
-      return decodeURIComponent(url);
-    }
-  }
-});
-
-// Add script injection handler
-scramjet.loadConfig = async function() {
-  await this.constructor.prototype.loadConfig.call(this);
-  
-  // Inject our custom script into all pages
-  const originalCreateFrame = this.createFrame;
-  this.createFrame = function(frame) {
-    if (originalCreateFrame) {
-      originalCreateFrame.call(this, frame);
-    }
-    
-    // Inject the popup interception script
-    if (frame && frame.contentWindow) {
-      try {
-        const script = document.createElement('script');
-        script.src = '/scram/scramjet-inject.js';
-        frame.contentDocument?.head?.appendChild(script);
-      } catch (e) {
-        console.warn('Could not inject Scramjet popup script:', e);
-      }
-    }
-  };
-};
-
-window.sj = scramjet;
+        prefix: "/~/scramjet/",
+        files: {
+          wasm: "/scram/scramjet.wasm.wasm",
+          worker: "/scram/scramjet.worker.js",
+          client: "/scram/scramjet.client.js",
+          shared: "/scram/scramjet.shared.js",
+          sync: "/scram/scramjet.sync.js",
+        },
+      });
+      window.sj = scramjet;
     </script>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
