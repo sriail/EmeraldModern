@@ -30,6 +30,37 @@
         },
       });
       window.sj = scramjet;
+      <script>
+  // Global popup interceptor for Scramjet
+  (function() {
+    const originalOpen = window.open;
+    
+    window.open = function(url, target, features) {
+      console.log('[Emerald Global] window.open called:', url, target, features);
+      
+      // Check if this is a proxy URL trying to open in a new window
+      if (url && (url.includes('/~/scramjet/') || url.includes('/~/uv/'))) {
+        console.log('[Emerald Global] Proxy popup detected, sending to React');
+        
+        // Send message to React app
+        window.postMessage({
+          type: 'PROXY_POPUP',
+          url: url,
+          target: target,
+          timestamp: Date.now()
+        }, '*');
+        
+        // Block the popup
+        return null;
+      }
+      
+      // Allow other popups
+      return originalOpen.call(this, url, target, features);
+    };
+    
+    console.log('[Emerald Global] Popup interceptor installed');
+  })();
+</script>
     </script>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
