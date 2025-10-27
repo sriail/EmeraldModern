@@ -841,88 +841,75 @@ const TabbedHome = () => {
     }
   };
 
-useEffect(() => {
-  const cleanupFunctions: { [tabId: string]: () => void } = {};
+  useEffect(() => {
+    const cleanupFunctions: { [tabId: string]: () => void } = {};
 
-  tabs.forEach((tab) => {
-    if (!tab.url || tab.url.startsWith("about:")) return;
+    tabs.forEach((tab) => {
+      if (!tab.url || tab.url.startsWith("about:")) return; // No need for listener on blank or internal tabs
 
-    const iframe = iframeRefs.current[tab.id];
-    if (!iframe) return;
+      const iframe = iframeRefs.current[tab.id];
+      if (!iframe) return;
 
-    const handleIframeLoad = () => {
-      // Update title and favicon
-      try {
-        if (iframe.contentWindow && iframe.contentWindow.document) {
-          const iframeDocument = iframe.contentWindow.document;
-          const pageTitle = iframeDocument.title;
-          let pageFavicon = "";
+      const handleIframeLoad = () => {
+        try {
+          if (iframe.contentWindow && iframe.contentWindow.document) {
+            const iframeDocument = iframe.contentWindow.document;
+            const pageTitle = iframeDocument.title;
+            let pageFavicon = "";
 
-          const faviconLink = iframeDocument.querySelector(
-            "link[rel='icon'], link[rel='shortcut icon']"
-          ) as HTMLLinkElement;
-          if (faviconLink) {
-            pageFavicon = faviconLink.href;
+            const faviconLink = iframeDocument.querySelector(
+              "link[rel='icon'], link[rel='shortcut icon']"
+            ) as HTMLLinkElement;
+            if (faviconLink) {
+              pageFavicon = faviconLink.href;
+            }
+            setTabs((prevTabs) =>
+              prevTabs.map((prevTab) =>
+                prevTab.id === tab.id
+                  ? {
+                      ...prevTab,
+                      title: pageTitle || prevTab.title,
+                      favicon: pageFavicon || prevTab.favicon,
+                    }
+                  : prevTab
+              )
+            );
           }
+        } catch (error) {
+          console.warn(
+            `Could not access iframe content for title/favicon update (tab ${tab.id}):`,
+            error
+          );
           setTabs((prevTabs) =>
             prevTabs.map((prevTab) =>
-              prevTab.id === tab.id
+              prevTab.id === tab.id && !prevTab.title.includes(".")
                 ? {
                     ...prevTab,
-                    title: pageTitle || prevTab.title,
-                    favicon: pageFavicon || prevTab.favicon,
+                    title: prevTab.url.split("/")[2] || prevTab.url,
                   }
                 : prevTab
             )
           );
         }
-      } catch (error) {
-        console.warn(
-          `Could not access iframe content for title/favicon update (tab ${tab.id}):`,
-          error
-        );
-        setTabs((prevTabs) =>
-          prevTabs.map((prevTab) =>
-            prevTab.id === tab.id && !prevTab.title.includes(".")
-              ? {
-                  ...prevTab,
-                  title: prevTab.url.split("/")[2] || prevTab.url,
-                }
-              : prevTab
-          )
-        );
-      }
-      
-      // Inject popup interception script
-      try {
-        if (iframe.contentWindow && iframe.contentDocument) {
-          const script = iframe.contentDocument.createElement('script');
-          script.src = `/scram/${settingsStore.proxy}-inject.js`;
-          iframe.contentDocument.head?.appendChild(script);
-          console.log(`Injected ${settingsStore.proxy} popup script`);
-        }
-      } catch (error) {
-        console.warn('Could not inject popup script (likely CORS):', error);
-      }
-    };
+      };
 
-    iframe.addEventListener("load", handleIframeLoad);
-    cleanupFunctions[tab.id] = () => {
-      iframe.removeEventListener("load", handleIframeLoad);
-    };
-  });
+      iframe.addEventListener("load", handleIframeLoad);
+      cleanupFunctions[tab.id] = () => {
+        iframe.removeEventListener("load", handleIframeLoad);
+      };
+    });
 
-  return () => {
-    Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
-  };
-}, [tabs]);
+    return () => {
+      Object.values(cleanupFunctions).forEach((cleanup) => cleanup());
+    };
+  }, [tabs]);  // ← This closes the FIRST useEffect (REMOVE the duplicate at the end)
+
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
     const handlePointerLockChange = () => {
       // Forward pointer lock state to all iframes
       Object.values(iframeRefs.current).forEach((iframe) => {
         if (iframe?.contentWindow) {
-
           try {
             if (document.pointerLockElement) {
               iframe.contentWindow.postMessage(
@@ -959,42 +946,7 @@ useEffect(() => {
       document.removeEventListener("pointerlockchange", handlePointerLockChange);
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
-    // Monitor iframe navigation for popup attempts
-  useEffect(() => {
-    const handleNavigation = (event: MessageEvent) => {
-      // UV and Scramjet can send navigation events via postMessage
-      if (event.data && event.data.type === 'navigate') {
-        console.log('Navigation detected:', event.data);
-        
-        // If it's a new window/popup request
-        if (event.data.newWindow || event.data.target === '_blank') {
-          const url = event.data.url;
-          
-          // Create new internal tab instead
-          const newTab: Tab = {
-            id: `tab-${Date.now()}`,
-            title: "Loading...",
-            url: url,
-            favicon: "",
-            isActive: true,
-          };
-          setTabs((prevTabs) =>
-            prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
-          );
-          setInputUrl(url);
-          
-          // Prevent the actual popup
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
-    };
-
-    window.addEventListener('message', handleNavigation);
-    return () => window.removeEventListener('message', handleNavigation);
-  }, []);
-  
+  }, []); 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
