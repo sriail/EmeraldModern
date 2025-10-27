@@ -963,15 +963,25 @@ const TabbedHome = () => {
     }
   };
   
+// Monitor for popup attempts
 useEffect(() => {
+  console.log('[Emerald React] Setting up message listener...');
+  
   const handleMessage = (event: MessageEvent) => {
-    // Only process messages from same origin
-    if (event.origin !== window.location.origin) return;
+    console.log('[Emerald React] Message received:', {
+      type: event.data?.type,
+      origin: event.origin,
+      data: event.data
+    });
     
-    console.log('[Emerald] Received message:', event.data);
+    // Only process messages from same origin
+    if (event.origin !== window.location.origin) {
+      console.log('[Emerald React] Ignoring message from different origin');
+      return;
+    }
     
     if (event.data && event.data.type === 'PROXY_POPUP') {
-      console.log('[Emerald] Proxy popup detected:', event.data.url);
+      console.log('[Emerald React] Processing PROXY_POPUP:', event.data.url);
       
       let actualUrl = event.data.url;
       
@@ -980,11 +990,13 @@ useEffect(() => {
         const proxyMatch = actualUrl.match(/\/~\/(scramjet|uv)\/(.+)/);
         if (proxyMatch) {
           actualUrl = decodeURIComponent(proxyMatch[2]);
-          console.log('[Emerald] Extracted URL:', actualUrl);
+          console.log('[Emerald React] Extracted URL:', actualUrl);
         }
       } catch (e) {
-        console.warn('[Emerald] Could not extract URL:', e);
+        console.warn('[Emerald React] Could not extract URL:', e);
       }
+      
+      console.log('[Emerald React] Creating new tab with URL:', actualUrl);
       
       // Create new internal tab
       const newTab: Tab = {
@@ -995,17 +1007,23 @@ useEffect(() => {
         isActive: true,
       };
       
-      setTabs((prevTabs) =>
-        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
-      );
+      setTabs((prevTabs) => {
+        const updated = prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab);
+        console.log('[Emerald React] Updated tabs:', updated);
+        return updated;
+      });
       setInputUrl(actualUrl);
+      
+      console.log('[Emerald React] New tab created successfully!');
     }
   };
 
   window.addEventListener('message', handleMessage);
+  console.log('[Emerald React] Message listener registered');
   
   return () => {
     window.removeEventListener('message', handleMessage);
+    console.log('[Emerald React] Message listener removed');
   };
 }, []);
 
