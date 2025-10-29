@@ -1,3 +1,18 @@
+(function() {
+  try {
+    if (window.top !== window.self && window.top.createEmeraldTab) {
+      window._openOrig = window.open;
+      window.open = function(url, target, features) {
+        try {
+          window.top.createEmeraldTab(url);
+        } catch(e) {
+          if (window._openOrig) return window._openOrig(url, target, features);
+        }
+        return null;
+      };
+    }
+  } catch (e) {}
+})();
 (()=>{var e={129:function(e,r,t){t.d(r,{u:()=>c});var o=t(9777),n=t(1762).Z;class c extends EventTarget{controller;frame;constructor(e,r){super(),this.controller=e,this.frame=r,r[o.D1]=this}get client(){return this.frame.contentWindow.window[o.a3]}get url(){return this.client.url}go(e){e instanceof URL&&(e=e.toString()),n.log("navigated to",e),this.frame.src=this.controller.encodeUrl(e)}back(){this.frame.contentWindow?.history.back()}forward(){this.frame.contentWindow?.history.forward()}reload(){this.frame.contentWindow?.location.reload()}}},1762:function(e,r,t){t.d(r,{Z:()=>o});let o={fmt:function(e,r,...t){let o=Error.prepareStackTrace;Error.prepareStackTrace=(e,r)=>{r.shift(),r.shift(),r.shift();let t="";for(let e=1;e<Math.min(2,r.length);e++)r[e].getFunctionName()&&(t+=`${r[e].getFunctionName()} -> `+t);return t+(r[0].getFunctionName()||"Anonymous")};let n=function(){try{throw Error()}catch(e){return e.stack}}();Error.prepareStackTrace=o,(console[e]||console.log)(`%c${n}%c ${r}`,`
 		background-color: ${{log:"#000",warn:"#f80",error:"#f00",debug:"transparent"}[e]};
 		color: ${{log:"#fff",warn:"#fff",error:"#fff",debug:"gray"}[e]};
