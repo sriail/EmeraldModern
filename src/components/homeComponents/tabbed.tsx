@@ -949,6 +949,24 @@ const TabbedHome = () => {
   }, []); 
 
   useEffect(() => {
+  window.createEmeraldTab = (url) => {
+    const newTab = {
+      id: `tab-${Date.now()}`,
+      title: "Loading...",
+      url,
+      favicon: "",
+      isActive: true,
+    };
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+    );
+  };
+  return () => {
+    delete window.createEmeraldTab;
+  };
+}, []);
+
+  useEffect(() => {
   const handleMessage = (event: MessageEvent) => {
     // Handle navigation requests from iframe
     if (event.data && event.data.type === 'navigate') {
