@@ -947,6 +947,28 @@ const TabbedHome = () => {
       window.removeEventListener("message", handleMessage);
     };
   }, []); 
+
+  useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    // Handle navigation requests from iframe
+    if (event.data && event.data.type === 'navigate') {
+      const newTab: Tab = {
+        id: `tab-${Date.now()}`,
+        title: "Loading...",
+        url: event.data.url,
+        favicon: "",
+        isActive: true,
+      };
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+      );
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, []);
+  
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
