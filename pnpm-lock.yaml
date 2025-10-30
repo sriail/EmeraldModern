@@ -8,6 +8,18 @@ importers:
 
   .:
     dependencies:
+    '@emotion/react':
+        specifier: ^11.13.5
+        version: 11.13.5(@types/react@18.3.18)(react@18.3.1) # New Entry
+      '@emotion/styled':
+        specifier: ^11.13.5
+        version: 11.13.5(@emotion/react@11.13.5(@types/react@18.3.18)(react@18.3.1))(@types/react@18.3.18)(react@18.3.1) # New Entry
+      '@mui/icons-material':
+        specifier: ^7.3.4
+        version: 7.3.4(@emotion/react@11.13.5(@types/react@18.3.18)(react@18.3.1))(@mui/material@7.3.4(@emotion/react@11.13.5(@types/react@18.3.18)(react@18.3.1))(@emotion/styled@11.13.5(...)))(@types/react@18.3.18)(react@18.3.1) # New Entry (Complex due to MUI's internal use of emotion and core)
+      '@mui/material':
+        specifier: ^7.3.4
+        version: 7.3.4(@emotion/react@11.13.5(@types/react@18.3.18)(react@18.3.1))(@emotion/styled@11.13.5(...))(@types/react@18.3.18)(react@18.3.1) # New Entry
       '@fastify/middie':
         specifier: ^9.0.3
         version: 9.0.3
@@ -77,9 +89,6 @@ importers:
       framer-motion:
         specifier: ^11.18.2
         version: 11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      lucide-react:
-        specifier: ^0.447.0
-        version: 0.447.0(react@18.3.1)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
