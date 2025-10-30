@@ -1,19 +1,20 @@
 [build]
-  # IMPORTANT: Use the single command that successfully builds your client app
-  # Change 'pnpm run build' to 'npm run build' or 'yarn run build' if you use a different package manager.
   command = "pnpm run build" 
-
-  # The directory where Vite places the final 'index.html' and assets.
-  # This is the directory Netlify will serve publicly via its CDN.
   publish = "dist"
-
-  # Set a minimum required Node.js version for the build environment
+  functions = "netlify/functions" # ⬅️ ADD: Define the folder where Netlify should look for functions
   environment = { NODE_VERSION = "20" }
-
 
 # CRITICAL FOR FIXING THE WHITE SCREEN ON DEEP LINKS (SPA ROUTING)
 [[redirects]]
-  # This rule ensures that all non-file paths fall back to your main page
+  # This rule handles all static client routes (e.g., /settings)
   from = "/*"
   to = "/index.html"
+  status = 200
+
+# ⬅️ ADD THIS REDIRECT BLOCK
+[[redirects]]
+  # 1. THIS TARGETS ALL API CALLS (e.g., /api/data)
+  from = "/api/*"
+  # 2. THIS FORWARDS THE REQUEST TO THE NETLIFY FUNCTION NAMED 'api'
+  to = "/.netlify/functions/api/:splat" 
   status = 200
