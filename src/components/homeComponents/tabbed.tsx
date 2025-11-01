@@ -1284,19 +1284,22 @@ const TabbedHome = () => {
                   <SettingsPage />
                 </div>
               ) : tab.url ? (
-               <iframe
-  ref={(el) => {
-    if (el) iframeRefs.current[tab.id] = el;
-  }}
-  src={
-    tab.url
+              <iframe
+         ref={(el) => {
+        if (el) iframeRefs.current[tab.id] = el;
+        }}
+        src={
+        tab.url
       ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
       : ""
-  }
-  className="w-full h-full border-0"
-  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-  title={tab.title}
-/>
+      }
+         className="w-full h-full border-0"
+         sandbox={settingsStore.proxy === "scramjet" 
+         ? "allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+          : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+       }
+        title={tab.title}
+             />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-start pt-20 bg-gradient-to-b from-background to-background/80 overflow-auto">
                   <GridPattern
