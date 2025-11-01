@@ -904,6 +904,44 @@ const TabbedHome = () => {
     };
   }, [tabs]);  // ← This closes the FIRST useEffect (REMOVE the duplicate at the end)
 
+  // Initialize Scramjet frames and handle popup interception
+useEffect(() => {
+  if (settingsStore.proxy === "scramjet" && window.sj) {
+    // Initialize Scramjet for each iframe
+    tabs.forEach((tab) => {
+      const iframe = iframeRefs.current[tab.id];
+      if (iframe && tab.url && !tab.url.startsWith("about:")) {
+        try {
+          window.sj.createFrame(iframe);
+        } catch (error) {
+          console.warn("Could not initialize Scramjet frame:", error);
+        }
+      }
+    });
+  }
+
+  // Listen for Scramjet popup events
+  const handleMessage = (event: MessageEvent) => {
+    if (event.data && event.data.type === 'scramjet$type' && event.data.scramjet$type === 'popup') {
+      // Create a new tab for the popup
+      const newTab: Tab = {
+        id: `tab-${Date.now()}`,
+        title: 'Loading...',
+        url: event.data.url,
+        favicon: '',
+        isActive: true,
+      };
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) => ({ ...tab, isActive: false })).concat(newTab)
+      );
+      setInputUrl(event.data.url);
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, [tabs, settingsStore.proxy]);
+
   // Handle pointer lock for iframes
   useEffect(() => {  // ← This starts the SECOND useEffect
     const handlePointerLockChange = () => {
