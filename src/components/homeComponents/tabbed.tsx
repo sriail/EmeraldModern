@@ -1460,3 +1460,4 @@ if (iframeRefs.current[activeTabId]) {
 };
 
 export default TabbedHome;
+export {}; // Add this line - makes TypeScript treat this as a module
