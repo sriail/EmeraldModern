@@ -1284,23 +1284,54 @@ const TabbedHome = () => {
                   <SettingsPage />
                 </div>
               ) : tab.url ? (
-           <iframe
-          ref={(el) => {
-         if (el) iframeRefs.current[tab.id] = el;
-       }}
-       src={
-      tab.url
+         <iframe
+  ref={(el) => {
+    if (el) {
+      iframeRefs.current[tab.id] = el;
+      
+      // For Scramjet, inject window.open override after load
+      if (settingsStore.proxy === "scramjet") {
+        el.onload = () => {
+          try {
+            // Try to inject override script
+            const script = el.contentWindow?.document.createElement('script');
+            if (script && el.contentWindow) {
+              script.textContent = `
+                (function() {
+                  const originalOpen = window.open;
+                  window.open = function(url, target, features) {
+                    // Navigate in same window instead
+                    if (url) {
+                      window.location.href = url;
+                    }
+                    return null;
+                  };
+                })();
+              `;
+              el.contentWindow.document.head?.appendChild(script);
+              console.log('[Scramjet] window.open override injected');
+            }
+          } catch (e) {
+            // Cross-origin - can't inject, but that's ok
+            console.warn('[Scramjet] Could not inject override (cross-origin):', e);
+          }
+        };
+      }
+    }
+  }}
+  src={
+    tab.url
       ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
       : ""
-       }
-         className="w-full h-full border-0"
-           sandbox={
-            settingsStore.proxy === "scramjet"
-            ? "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation allow-pointer-lock"
-            : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-              }
-              title={tab.title}
-              />
+  }
+  className="w-full h-full border-0"
+  sandbox={
+    settingsStore.proxy === "scramjet"
+      ? "allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation allow-pointer-lock"
+      : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+  }
+  title={tab.title}
+/>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-start pt-20 bg-gradient-to-b from-background to-background/80 overflow-auto">
                   <GridPattern
