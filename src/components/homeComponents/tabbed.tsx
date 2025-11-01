@@ -703,14 +703,16 @@ const TabbedHome = () => {
       setTabs(updatedTabs);
       setInputUrl(bookmark.url);
 
-      const activeTabId = updatedTabs[activeTabIndex].id;
-      if (iframeRefs.current[activeTabId]) {
-        const encodedUrl = encodeURIComponent(bookmark.url);
-        iframeRefs.current[activeTabId]!.src =
-          `/~/${settingsStore.proxy}/${encodedUrl}`;
-      }
-    }
-  };
+   const activeTabId = updatedTabs[activeTabIndex].id;
+if (iframeRefs.current[activeTabId]) {
+  if (settingsStore.proxy === "scramjet" && window.sj) {
+    const encodedUrl = window.sj.encodeUrl(bookmark.url);
+    iframeRefs.current[activeTabId]!.src = `/~/scramjet/${encodedUrl}`;
+  } else {
+    const encodedUrl = encodeURIComponent(bookmark.url);
+    iframeRefs.current[activeTabId]!.src = `/~/${settingsStore.proxy}/${encodedUrl}`;
+  }
+}
 
   const handleAddBookmark = () => {
     const activeTab = tabs.find((tab) => tab.isActive);
