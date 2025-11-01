@@ -255,14 +255,18 @@ const DefaultHome = () => {
           }`
         )}
       />
-      <iframe
-        src=""
-        ref={frame}
-        className={`w-full h-screen ${shouldOpen ? "" : "hidden"} z-20`}
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-        allow="pointer-lock"
-        title="Browser content"
-      ></iframe>
+    <iframe
+  src=""
+  ref={frame}
+  className={`w-full h-screen ${shouldOpen ? "" : "hidden"} z-20`}
+  sandbox={
+    settingStore.proxy === "scramjet"
+      ? "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation allow-pointer-lock"
+      : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
+       }
+      allow="pointer-lock"
+     title="Browser content"
+    ></iframe>
       <div
         className={`w-full min-h-screen flex items-center justify-center z-20 ${
           shouldOpen ? "hidden" : ""
