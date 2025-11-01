@@ -1130,6 +1130,16 @@ useEffect(() => {
       }
     }
 
+    const activeTabId = updatedTabs[activeTabIndex].id;
+if (iframeRefs.current[activeTabId]) {
+  if (settingsStore.proxy === "scramjet" && window.sj) {
+    const encodedUrl = window.sj.encodeUrl(processedUrl);
+    iframeRefs.current[activeTabId]!.src = `/~/scramjet/${encodedUrl}`;
+  } else {
+    const encodedUrl = encodeURIComponent(processedUrl);
+    iframeRefs.current[activeTabId]!.src = `/~/${settingsStore.proxy}/${encodedUrl}`;
+  }
+}
     const activeTabIndex = tabs.findIndex((tab) => tab.isActive);
     if (activeTabIndex !== -1) {
       const updatedTabs = [...tabs];
