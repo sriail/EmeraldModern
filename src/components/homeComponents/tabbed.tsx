@@ -35,6 +35,25 @@ import {
 } from "../ui/select";
 import { Obfuscate } from "../obf";
 import { VERSION } from "@/constants";
+declare global {
+  interface Window {
+    sj?: {
+      init: (path: string) => Promise<ServiceWorkerRegistration>;
+      createFrame: (frame?: HTMLIFrameElement) => void;
+      encodeUrl: (url: string | URL) => string;
+      saveConfig: () => void;
+      modifyConfig: () => void;
+    };
+  }
+}
+
+interface Tab {
+  id: string;
+  title: string;
+  url: string;
+  favicon?: string;
+  isActive: boolean;
+}
 interface Tab {
   id: string;
   title: string;
