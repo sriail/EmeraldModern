@@ -10,6 +10,19 @@
   <iframe id="contentFrame" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock" src="" frameborder="0" width="100%" height="100%"></iframe>
 
   <script>
+    // Detect if we're in an about:blank cloak and adjust message target
+function getMessageTarget() {
+  try {
+    // If we're in an about:blank, we need to go up multiple levels
+    if (window.parent !== window && window.parent.parent !== window.parent) {
+      return window.parent.parent; // Go through about:blank iframe
+    }
+    return window.parent;
+  } catch (e) {
+    return window.parent;
+  }
+}
+
     (function () {
       const params = new URLSearchParams(location.search);
       const proxiedUrl = params.get('url');
