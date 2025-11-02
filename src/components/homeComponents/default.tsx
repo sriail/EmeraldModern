@@ -535,20 +535,40 @@ const handleSearch = (p?: string, isPhrase = false) => {
           >
             {shouldOpen && (
               <div className="flex space-x-4">
-                <ArrowBackIcon
-                  onClick={() => {
-                    frame.current!.contentWindow?.history.back();
-                  }}
-                  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
-                />
-                <ArrowForwardIcon
-                  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
-                  onClick={() =>
-                    frame.current?.contentWindow?.history.forward()
-                  }
-                />
-              </div>
-            )}
+<ArrowBackIcon
+  onClick={() => {
+    if (settingStore.proxy === "scramjet") {
+      try {
+        const innerFrame = frame.current?.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
+        if (innerFrame?.contentWindow) {
+          innerFrame.contentWindow.history.back();
+        }
+      } catch (e) {
+        console.warn('Could not navigate back in scramjet wrapper');
+      }
+    } else {
+      frame.current!.contentWindow?.history.back();
+    }
+  }}
+  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
+/>
+<ArrowForwardIcon
+  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
+  onClick={() => {
+    if (settingStore.proxy === "scramjet") {
+      try {
+        const innerFrame = frame.current?.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
+        if (innerFrame?.contentWindow) {
+          innerFrame.contentWindow.history.forward();
+        }
+      } catch (e) {
+        console.warn('Could not navigate forward in scramjet wrapper');
+      }
+    } else {
+      frame.current?.contentWindow?.history.forward();
+    }
+  }}
+/>
 
             <DockIcon>
               <HomeIcon
