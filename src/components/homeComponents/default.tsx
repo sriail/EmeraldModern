@@ -513,105 +513,90 @@ const handleSearch = (p?: string, isPhrase = false) => {
           </div>
         </motion.div>
       </div>
-      <Draggable
-        disabled={!shouldOpen}
-        handle=".handle"
-        positionOffset={{
-          x: "-50%",
-          y: "-1%",
-        }}
-      >
-        <div className="max-w-[10rem] h-fit flex absolute bottom-5 left-[47.7%] translate-x-[-50%]">
-          {shouldOpen && (
-            <div className="handle cursor-move supports-backdrop-blur:bg-white/30 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max gap-2 rounded-2xl border border-primary/20 p-2 backdrop-blur-md">
-              <MenuIcon className="w-6 h-6 text-primary" />
-            </div>
-          )}
-          <Dock
-            direction="middle"
-            magnification={50}
-            className={`${shouldOpen ? "bg-card/90 backdrop-blur-md border border-primary/20 shadow-lg rounded-l-none" : "bg-card/50 backdrop-blur-md border border-primary/10 shadow-lg"}`}
-            ref={dock}
-          >
-            {shouldOpen && (
-              <div className="flex space-x-4">
-<ArrowBackIcon
-  onClick={() => {
-    if (settingStore.proxy === "scramjet") {
-      try {
-        const innerFrame = frame.current?.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
-        if (innerFrame?.contentWindow) {
-          innerFrame.contentWindow.history.back();
-        }
-      } catch (e) {
-        console.warn('Could not navigate back in scramjet wrapper');
-      }
-    } else {
-      frame.current!.contentWindow?.history.back();
-    }
+  <Draggable
+  disabled={!shouldOpen}
+  handle=".handle"
+  positionOffset={{
+    x: "-50%",
+    y: "-1%",
   }}
-  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
-/>
-<ArrowForwardIcon
-  className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
-  onClick={() => {
-    if (settingStore.proxy === "scramjet") {
-      try {
-        const innerFrame = frame.current?.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
-        if (innerFrame?.contentWindow) {
-          innerFrame.contentWindow.history.forward();
-        }
-      } catch (e) {
-        console.warn('Could not navigate forward in scramjet wrapper');
-      }
-    } else {
-      frame.current?.contentWindow?.history.forward();
-    }
-  }}
-/>
+>
+  <div className="max-w-[10rem] h-fit flex absolute bottom-5 left-[47.7%] translate-x-[-50%]">
+    {shouldOpen && (
+      <div className="handle cursor-move supports-backdrop-blur:bg-white/30 supports-backdrop-blur:dark:bg-black/10 mx-auto mt-8 flex h-[58px] w-max gap-2 rounded-2xl border border-primary/[...">
+        <MenuIcon className="w-6 h-6 text-primary" />
+      </div>
+    )}
 
-            <DockIcon>
-              <HomeIcon
-                className="w-6 h-6 hover:w-8 hover:h-8 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
-                onClick={() => {
-                  window.location.reload();
-                }}
-              />
-            </DockIcon>
-            <DockIcon>
-              <Link to="/games">
-                <SportsEsportsIcon className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
-              </Link>
-            </DockIcon>
-            <DockIcon>
-              <SettingsIcon
-                onClick={() => setOpenSettings(true)}
-                className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
-              />
-            </DockIcon>
-            <DockIcon>
-              <motion.img
-                whileHover={{ scale: 1.2, y: -5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                src="/discordDock.svg"
-                className="w-6 h-6 transition-all"
-                onClick={() =>
-                  window.open("https://discord.gg/Dpj8C8SAmH", "_blank")
-                }
-                alt={"Discord Logo"}
-              />
-            </DockIcon>
-            {shouldOpen && (
-              <DockIcon>
-                <SearchIcon
-                  className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
-                  onClick={() => setOpenSearch(!openSearch)}
-                />
-              </DockIcon>
-            )}
-          </Dock>
+    <Dock
+      direction="middle"
+      magnification={50}
+      className={`${
+        shouldOpen
+          ? "bg-card/90 backdrop-blur-md border border-primary/20 shadow-lg rounded-l-none"
+          : "bg-card/50 backdrop-blur-md border border-primary/10 shadow-lg"
+      }`}
+      ref={dock}
+    >
+      {shouldOpen && (
+        <div className="flex space-x-4">
+          <ArrowBackIcon
+            onClick={() => {
+              frame.current!.contentWindow?.history.back();
+            }}
+            className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
+          />
+          <ArrowForwardIcon
+            className="transform hover:-translate-y-1 transition-all hover:scale-105 cursor-pointer text-primary/80 hover:text-primary"
+            onClick={() => frame.current?.contentWindow?.history.forward()}
+          />
         </div>
-      </Draggable>
+      )}
+
+      <DockIcon>
+        <HomeIcon
+          className="w-6 h-6 hover:w-8 hover:h-8 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
+          onClick={() => {
+            window.location.reload();
+          }}
+        />
+      </DockIcon>
+
+      <DockIcon>
+        <Link to="/games">
+          <SportsEsportsIcon className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary" />
+        </Link>
+      </DockIcon>
+
+      <DockIcon>
+        <SettingsIcon
+          onClick={() => setOpenSettings(true)}
+          className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
+        />
+      </DockIcon>
+
+      <DockIcon>
+        <motion.img
+          whileHover={{ scale: 1.2, y: -5 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          src="/discordDock.svg"
+          className="w-6 h-6 transition-all"
+          onClick={() => window.open("https://discord.gg/Dpj8C8SAmH", "_blank")}
+          alt={"Discord Logo"}
+        />
+      </DockIcon>
+
+      {shouldOpen && (
+        <DockIcon>
+          <SearchIcon
+            className="w-6 h-6 hover:w-7 hover:h-7 transition-all transform hover:-translate-y-2 text-primary/80 hover:text-primary"
+            onClick={() => setOpenSearch(!openSearch)}
+          />
+        </DockIcon>
+      )}
+    </Dock>
+  </div>
+</Draggable>
 
       <Dialog open={openSettings} onOpenChange={setOpenSettings}>
         <DialogContent
