@@ -730,35 +730,60 @@ const TabbedHome = () => {
   };
 
   // add to TabbedHome's useEffect init area (once)
+// Update the message handler useEffect to also handle metadata updates
 useEffect(() => {
-  const onNavRequest = (ev: MessageEvent) => {
+  const onMessage = (ev: MessageEvent) => {
     try {
       const d = ev.data;
-      if (!d || d.type !== 'scramjet-nav-request' || !d.url) return;
-      // Current active tab id:
-      const activeIndex = tabs.findIndex(t => t.isActive);
-      if (activeIndex === -1) return;
-      const newUrl = d.url;
+      if (!d || typeof d !== 'object') return;
+      
+      // Handle navigation requests
+      if (d.type === 'scramjet-nav-request' && d.url) {
+        const activeIndex = tabs.findIndex(t => t.isActive);
+        if (activeIndex === -1) return;
+        const newUrl = d.url;
 
-      // update tab model
-      setTabs(prev => {
-        const copy = [...prev];
-        copy[activeIndex] = { ...copy[activeIndex], url: newUrl, title: 'Loading...', favicon: '' };
-        return copy;
-      });
+        setTabs(prev => {
+          const copy = [...prev];
+          copy[activeIndex] = { ...copy[activeIndex], url: newUrl, title: 'Loading...', favicon: '' };
+          return copy;
+        });
 
-      const activeId = tabs[activeIndex].id;
-      const proxied = `/~/${settingsStore.proxy}/${encodeURIComponent(newUrl)}`;
-      const finalSrc = settingsStore.proxy === 'scramjet'
-        ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
-        : proxied;
-      if (iframeRefs.current[activeId]) iframeRefs.current[activeId]!.src = finalSrc;
+        const activeId = tabs[activeIndex].id;
+        const proxied = `/~/${settingsStore.proxy}/${encodeURIComponent(newUrl)}`;
+        const finalSrc = settingsStore.proxy === 'scramjet'
+          ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+          : proxied;
+        if (iframeRefs.current[activeId]) iframeRefs.current[activeId]!.src = finalSrc;
+      }
+      
+      // Handle metadata updates (title, favicon)
+      if (d.type === 'scramjet-metadata-update') {
+        const activeIndex = tabs.findIndex(t => t.isActive);
+        if (activeIndex === -1) return;
+        
+        setTabs(prev => {
+          const copy = [...prev];
+          copy[activeIndex] = {
+            ...copy[activeIndex],
+            title: d.title || copy[activeIndex].title,
+            favicon: d.favicon || copy[activeIndex].favicon
+          };
+          return copy;
+        });
+        
+        // Update URL input if URL changed
+        if (d.url) {
+          setInputUrl(d.url);
+        }
+      }
     } catch (e) {
-      console.error('scramjet nav handler', e);
+      console.error('message handler error', e);
     }
   };
-  window.addEventListener('message', onNavRequest);
-  return () => window.removeEventListener('message', onNavRequest);
+  
+  window.addEventListener('message', onMessage);
+  return () => window.removeEventListener('message', onMessage);
 }, [tabs, settingsStore.proxy]);
 
   useEffect(() => {
