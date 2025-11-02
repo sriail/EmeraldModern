@@ -1284,37 +1284,54 @@ const TabbedHome = () => {
                   <SettingsPage />
                 </div>
               ) : tab.url ? (
-         <iframe
+<iframe
   ref={(el) => {
     if (el) {
       iframeRefs.current[tab.id] = el;
       
-      // For Scramjet, inject window.open override after load
+      // For Scramjet, inject window.open override that navigates in same tab
       if (settingsStore.proxy === "scramjet") {
-        el.onload = () => {
+        const injectOverride = () => {
           try {
-            // Try to inject override script
-            const script = el.contentWindow?.document.createElement('script');
-            if (script && el.contentWindow) {
+            if (el.contentWindow) {
+              const script = el.contentWindow.document.createElement('script');
               script.textContent = `
                 (function() {
+                  if (window.__scramjetOverrideInstalled) return;
+                  window.__scramjetOverrideInstalled = true;
+                  
                   const originalOpen = window.open;
                   window.open = function(url, target, features) {
-                    if (url) {
-                      window.location.href = url;
+                    console.log('[Scramjet Override] Intercepting window.open:', url, target);
+                    
+                    // If it's trying to open in a new window/tab (_blank, _new, etc)
+                    // redirect to current window instead
+                    if (!target || target === '_blank' || target === '_new') {
+                      if (url) {
+                        window.location.href = url;
+                      }
+                      return window;
                     }
-                    return null;
+                    
+                    // For same-window targets (_self, _parent, _top), use original
+                    return originalOpen.call(window, url, target, features);
                   };
+                  
+                  console.log('[Scramjet Override] window.open override installed successfully');
                 })();
               `;
-              el.contentWindow.document.head?.appendChild(script);
-              console.log('[Scramjet] window.open override injected');
+              el.contentWindow.document.documentElement.appendChild(script);
             }
           } catch (e) {
-            // Cross-origin - can't inject, but that's ok
-            console.warn('[Scramjet] Could not inject override (cross-origin):', e);
+            console.warn('[Scramjet] Could not inject override:', e);
           }
         };
+        
+        // Inject on load
+        el.addEventListener('load', injectOverride);
+        
+        // Also try immediate injection in case it's already loaded
+        setTimeout(injectOverride, 100);
       }
     }
   }}
@@ -1324,11 +1341,7 @@ const TabbedHome = () => {
       : ""
   }
   className="w-full h-full border-0"
-  sandbox={
-    settingsStore.proxy === "scramjet"
-      ? "allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation allow-pointer-lock"
-      : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-  }
+  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
   title={tab.title}
 />
               ) : (
