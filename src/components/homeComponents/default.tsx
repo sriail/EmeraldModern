@@ -156,26 +156,35 @@ const DefaultHome = () => {
       /^http(s?):\/\//.test(val) || (val.includes(".") && !val.startsWith(" "))
     );
   };
-  const handleSearch = (p?: string, isPhrase = false) => {
-    if (p && canParse(p)) {
-      if (!p.startsWith("http://") && !p.startsWith("https://")) {
-        p = "https://" + p;
-      }
-      setShouldOpen(true);
-      const encoding = encodeURIComponent(p);
-      frame.current!.src = `/~/${settingStore.proxy}/${encoding}`;
-      return;
+const handleSearch = (p?: string, isPhrase = false) => {
+  if (p && canParse(p)) {
+    if (!p.startsWith("http://") && !p.startsWith("https://")) {
+      p = "https://" + p;
     }
-    if (p && isPhrase) {
-      setShouldOpen(true);
-      const encoding = encodeURIComponent(settingStore.searchEngine.url + p);
-      frame.current!.src = `/~/${settingStore.proxy}/${encoding}`;
-    } else {
-      setShouldOpen(true);
-      const encoding = encodeURIComponent(settingStore.searchEngine.url + term);
-      frame.current!.src = `/~/${settingStore.proxy}/${encoding}`;
-    }
-  };
+    setShouldOpen(true);
+    const encoding = encodeURIComponent(p);
+    const proxied = `/~/${settingStore.proxy}/${encoding}`;
+    frame.current!.src = settingStore.proxy === "scramjet"
+      ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+      : proxied;
+    return;
+  }
+  if (p && isPhrase) {
+    setShouldOpen(true);
+    const encoding = encodeURIComponent(settingStore.searchEngine.url + p);
+    const proxied = `/~/${settingStore.proxy}/${encoding}`;
+    frame.current!.src = settingStore.proxy === "scramjet"
+      ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+      : proxied;
+  } else {
+    setShouldOpen(true);
+    const encoding = encodeURIComponent(settingStore.searchEngine.url + term);
+    const proxied = `/~/${settingStore.proxy}/${encoding}`;
+    frame.current!.src = settingStore.proxy === "scramjet"
+      ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+      : proxied;
+  }
+};
 
   return (
     <>
