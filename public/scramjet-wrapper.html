@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="content"></iframe>
+  <script>
+    // Override window.open before loading content
+    (function() {
+      const contentFrame = document.getElementById('content');
+      
+      // Get the actual URL from query parameter
+      const params = new URLSearchParams(window.location.search);
+      const targetUrl = params.get('url');
+      
+      if (targetUrl) {
+        contentFrame.src = targetUrl;
+      }
+      
+      // Override window.open in the content frame
+      contentFrame.onload = function() {
+        try {
+          contentFrame.contentWindow.open = function(url, target, features) {
+            // Navigate in same iframe instead
+            if (url) {
+              contentFrame.contentWindow.location.href = url;
+            }
+            return null;
+          };
+        } catch (e) {
+          console.warn('Could not override window.open:', e);
+        }
+      };
+    })();
+  </script>
+</body>
+</html>
