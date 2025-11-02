@@ -729,8 +729,27 @@ const TabbedHome = () => {
     }
   };
 
-  // add to TabbedHome's useEffect init area (once)
-// Update the message handler useEffect to also handle metadata updates
+  // Reload iframes when proxy changes to reinitialize wrapper
+useEffect(() => {
+  tabs.forEach((tab) => {
+    if (!tab.url || tab.url.startsWith("about:")) return;
+    
+    const iframe = iframeRefs.current[tab.id];
+    if (!iframe) return;
+    
+    // Reconstruct the iframe src based on current proxy
+    const proxied = `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`;
+    const finalSrc = settingsStore.proxy === 'scramjet'
+      ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+      : proxied;
+    
+    // Only update if the src is different
+    if (iframe.src !== finalSrc && iframe.src !== '') {
+      iframe.src = finalSrc;
+    }
+  });
+}, [settingsStore.proxy]);
+
 useEffect(() => {
   const onMessage = (ev: MessageEvent) => {
     try {
@@ -745,16 +764,26 @@ useEffect(() => {
 
         setTabs(prev => {
           const copy = [...prev];
-          copy[activeIndex] = { ...copy[activeIndex], url: newUrl, title: 'Loading...', favicon: '' };
+          copy[activeIndex] = { 
+            ...copy[activeIndex], 
+            url: newUrl, 
+            title: 'Loading...', 
+            favicon: '' 
+          };
           return copy;
         });
+        
+        setInputUrl(newUrl);
 
         const activeId = tabs[activeIndex].id;
         const proxied = `/~/${settingsStore.proxy}/${encodeURIComponent(newUrl)}`;
         const finalSrc = settingsStore.proxy === 'scramjet'
           ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
           : proxied;
-        if (iframeRefs.current[activeId]) iframeRefs.current[activeId]!.src = finalSrc;
+        
+        if (iframeRefs.current[activeId]) {
+          iframeRefs.current[activeId]!.src = finalSrc;
+        }
       }
       
       // Handle metadata updates (title, favicon)
@@ -772,9 +801,19 @@ useEffect(() => {
           return copy;
         });
         
-        // Update URL input if URL changed
+        // Update URL input to show the actual decoded URL
         if (d.url) {
-          setInputUrl(d.url);
+          try {
+            // Extract the original URL from the proxied URL
+            const match = d.url.match(/\/~\/scramjet\/(.+)/);
+            if (match) {
+              const decodedUrl = decodeURIComponent(match[1]);
+              setInputUrl(decodedUrl);
+            }
+          } catch (e) {
+            // Fallback to raw URL
+            setInputUrl(d.url);
+          }
         }
       }
     } catch (e) {
@@ -1081,51 +1120,84 @@ useEffect(() => {
   };
 
   const refreshPage = () => {
-    const activeTab = tabs.find((tab) => tab.isActive);
-    if (
-      activeTab &&
-      iframeRefs.current[activeTab.id] &&
-      !activeTab.url.startsWith("about:")
-    ) {
-      try {
-        iframeRefs.current[activeTab.id]!.contentWindow?.location.reload();
-      } catch (error) {
-        console.error("Could not reload iframe:", error);
-        iframeRefs.current[activeTab.id]!.src =
-          iframeRefs.current[activeTab.id]!.src;
+  const activeTab = tabs.find((tab) => tab.isActive);
+  if (
+    activeTab &&
+    iframeRefs.current[activeTab.id] &&
+    !activeTab.url.startsWith("about:")
+  ) {
+    try {
+      const iframe = iframeRefs.current[activeTab.id]!;
+      
+      // For Scramjet, reload the inner iframe
+      if (settingsStore.proxy === "scramjet") {
+        const innerFrame = iframe.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
+        if (innerFrame?.contentWindow) {
+          innerFrame.contentWindow.location.reload();
+        } else {
+          // Fallback: reload the wrapper itself
+          iframe.src = iframe.src;
+        }
+      } else {
+        iframe.contentWindow?.location.reload();
       }
+    } catch (error) {
+      console.error("Could not reload iframe:", error);
+      // Fallback: reload by resetting src
+      iframe.src = iframe.src;
     }
-  };
+  }
+};
 
-  const goBack = () => {
-    const activeTab = tabs.find((tab) => tab.isActive);
-    if (
-      activeTab &&
-      iframeRefs.current[activeTab.id] &&
-      !activeTab.url.startsWith("about:")
-    ) {
-      try {
-        iframeRefs.current[activeTab.id]!.contentWindow?.history.back();
-      } catch (error) {
-        console.error("Could not navigate back:", error);
+const goBack = () => {
+  const activeTab = tabs.find((tab) => tab.isActive);
+  if (
+    activeTab &&
+    iframeRefs.current[activeTab.id] &&
+    !activeTab.url.startsWith("about:")
+  ) {
+    try {
+      const iframe = iframeRefs.current[activeTab.id]!;
+      
+      // For Scramjet, we need to go back in the inner iframe of the wrapper
+      if (settingsStore.proxy === "scramjet") {
+        const innerFrame = iframe.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
+        if (innerFrame?.contentWindow) {
+          innerFrame.contentWindow.history.back();
+        }
+      } else {
+        iframe.contentWindow?.history.back();
       }
+    } catch (error) {
+      console.error("Could not navigate back:", error);
     }
-  };
-
-  const goForward = () => {
-    const activeTab = tabs.find((tab) => tab.isActive);
-    if (
-      activeTab &&
-      iframeRefs.current[activeTab.id] &&
-      !activeTab.url.startsWith("about:")
-    ) {
-      try {
-        iframeRefs.current[activeTab.id]!.contentWindow?.history.forward();
-      } catch (error) {
-        console.error("Could not navigate forward:", error);
+  }
+};
+  
+const goForward = () => {
+  const activeTab = tabs.find((tab) => tab.isActive);
+  if (
+    activeTab &&
+    iframeRefs.current[activeTab.id] &&
+    !activeTab.url.startsWith("about:")
+  ) {
+    try {
+      const iframe = iframeRefs.current[activeTab.id]!;
+      
+      // For Scramjet, we need to go forward in the inner iframe of the wrapper
+      if (settingsStore.proxy === "scramjet") {
+        const innerFrame = iframe.contentWindow?.document.querySelector('#contentFrame') as HTMLIFrameElement;
+        if (innerFrame?.contentWindow) {
+          innerFrame.contentWindow.history.forward();
+        }
+      } else {
+        iframe.contentWindow?.history.forward();
       }
+    } catch (error) {
+      console.error("Could not navigate forward:", error);
     }
-  };
+  }
+};
 
   const handleUrlSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
