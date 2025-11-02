@@ -12,6 +12,7 @@ import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 // https://vitejs.dev/config/
 export default defineConfig({
+ base: "./",
   plugins: [
     react(),
     TanStackRouterVite(),
