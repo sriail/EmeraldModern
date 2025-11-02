@@ -1300,7 +1300,6 @@ const TabbedHome = () => {
                 (function() {
                   const originalOpen = window.open;
                   window.open = function(url, target, features) {
-                    // Navigate in same window instead
                     if (url) {
                       window.location.href = url;
                     }
