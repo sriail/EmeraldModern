@@ -1335,11 +1335,13 @@ const TabbedHome = () => {
       }
     }
   }}
-  src={
-    tab.url
-      ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
-      : ""
-  }
+src={
+  tab.url
+    ? settingsStore.proxy === "scramjet"
+      ? `/scramjet-wrapper.html?url=${encodeURIComponent(`/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`)}`
+      : `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
+    : ""
+}
   className="w-full h-full border-0"
   sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
   title={tab.title}
