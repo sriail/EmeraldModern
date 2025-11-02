@@ -261,39 +261,48 @@ const DefaultHome = () => {
     if (el) {
       frame.current = el;
       
-      // For Scramjet, inject window.open override after load
+      // For Scramjet, inject window.open override
       if (settingStore.proxy === "scramjet") {
-        el.onload = () => {
+        const injectOverride = () => {
           try {
-            const script = el.contentWindow?.document.createElement('script');
-            if (script && el.contentWindow) {
+            if (el.contentWindow) {
+              const script = el.contentWindow.document.createElement('script');
               script.textContent = `
                 (function() {
+                  if (window.__scramjetOverrideInstalled) return;
+                  window.__scramjetOverrideInstalled = true;
+                  
                   const originalOpen = window.open;
                   window.open = function(url, target, features) {
-                    if (url) {
-                      window.location.href = url;
+                    console.log('[Scramjet Override] Intercepting window.open:', url, target);
+                    
+                    if (!target || target === '_blank' || target === '_new') {
+                      if (url) {
+                        window.location.href = url;
+                      }
+                      return window;
                     }
-                    return null;
+                    
+                    return originalOpen.call(window, url, target, features);
                   };
+                  
+                  console.log('[Scramjet Override] window.open override installed successfully');
                 })();
               `;
-              el.contentWindow.document.head?.appendChild(script);
-              console.log('[Scramjet] window.open override injected');
+              el.contentWindow.document.documentElement.appendChild(script);
             }
           } catch (e) {
-            console.warn('[Scramjet] Could not inject override (cross-origin):', e);
+            console.warn('[Scramjet] Could not inject override:', e);
           }
         };
+        
+        el.addEventListener('load', injectOverride);
+        setTimeout(injectOverride, 100);
       }
     }
   }}
   className={`w-full h-screen ${shouldOpen ? "" : "hidden"} z-20`}
-  sandbox={
-    settingStore.proxy === "scramjet"
-      ? "allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation allow-pointer-lock"
-      : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
-  }
+  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
   allow="pointer-lock"
   title="Browser content"
 ></iframe>
