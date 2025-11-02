@@ -255,23 +255,22 @@ const DefaultHome = () => {
           }`
         )}
       />
-  <iframe
+<iframe
+  src=""
   ref={(el) => {
     if (el) {
-      iframeRefs.current[tab.id] = el;
+      frame.current = el;
       
       // For Scramjet, inject window.open override after load
-      if (settingsStore.proxy === "scramjet") {
+      if (settingStore.proxy === "scramjet") {
         el.onload = () => {
           try {
-            // Try to inject override script
             const script = el.contentWindow?.document.createElement('script');
             if (script && el.contentWindow) {
               script.textContent = `
                 (function() {
                   const originalOpen = window.open;
                   window.open = function(url, target, features) {
-                    // Navigate in same window instead
                     if (url) {
                       window.location.href = url;
                     }
@@ -283,26 +282,21 @@ const DefaultHome = () => {
               console.log('[Scramjet] window.open override injected');
             }
           } catch (e) {
-            // Cross-origin - can't inject, but that's ok
             console.warn('[Scramjet] Could not inject override (cross-origin):', e);
           }
         };
       }
     }
   }}
-  src={
-    tab.url
-      ? `/~/${settingsStore.proxy}/${encodeURIComponent(tab.url)}`
-      : ""
-  }
-  className="w-full h-full border-0"
+  className={`w-full h-screen ${shouldOpen ? "" : "hidden"} z-20`}
   sandbox={
-    settingsStore.proxy === "scramjet"
+    settingStore.proxy === "scramjet"
       ? "allow-same-origin allow-scripts allow-forms allow-presentation allow-top-navigation allow-pointer-lock"
       : "allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-top-navigation-by-user-activation allow-pointer-lock"
   }
-  title={tab.title}
-/>
+  allow="pointer-lock"
+  title="Browser content"
+></iframe>
       <div
         className={`w-full min-h-screen flex items-center justify-center z-20 ${
           shouldOpen ? "hidden" : ""
