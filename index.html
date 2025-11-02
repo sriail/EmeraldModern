@@ -30,6 +30,30 @@
         },
       });
       window.sj = scramjet;
+         <script>
+  // Clear and reinitialize bare-mux
+  (async function() {
+    try {
+      // Clear old bare-mux state
+      localStorage.removeItem('bare-mux-path');
+      
+      // Set the transport path
+      localStorage.setItem('bare-mux-path', '/baremux/worker.js');
+      
+      // Import and set the transport
+      if (window.sj) {
+        const { BareMuxConnection } = await import('/baremux/baremod.cjs');
+        const conn = new BareMuxConnection('/baremux/worker.js');
+        
+        // Use libcurl transport (more stable than epoxy)
+        await conn.setTransport('/libcurl/index.mjs', [{ wisp: 'ws://localhost:3000/w/' }]);
+        
+        console.log('[Bare-Mux] Transport initialized successfully');
+      }
+    } catch (err) {
+      console.error('[Bare-Mux] Initialization failed:', err);
+    }
+  })();
     </script>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
