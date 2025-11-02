@@ -729,6 +729,38 @@ const TabbedHome = () => {
     }
   };
 
+  // add to TabbedHome's useEffect init area (once)
+useEffect(() => {
+  const onNavRequest = (ev: MessageEvent) => {
+    try {
+      const d = ev.data;
+      if (!d || d.type !== 'scramjet-nav-request' || !d.url) return;
+      // Current active tab id:
+      const activeIndex = tabs.findIndex(t => t.isActive);
+      if (activeIndex === -1) return;
+      const newUrl = d.url;
+
+      // update tab model
+      setTabs(prev => {
+        const copy = [...prev];
+        copy[activeIndex] = { ...copy[activeIndex], url: newUrl, title: 'Loading...', favicon: '' };
+        return copy;
+      });
+
+      const activeId = tabs[activeIndex].id;
+      const proxied = `/~/${settingsStore.proxy}/${encodeURIComponent(newUrl)}`;
+      const finalSrc = settingsStore.proxy === 'scramjet'
+        ? `/scramjet-wrapper.html?url=${encodeURIComponent(proxied)}`
+        : proxied;
+      if (iframeRefs.current[activeId]) iframeRefs.current[activeId]!.src = finalSrc;
+    } catch (e) {
+      console.error('scramjet nav handler', e);
+    }
+  };
+  window.addEventListener('message', onNavRequest);
+  return () => window.removeEventListener('message', onNavRequest);
+}, [tabs, settingsStore.proxy]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "s") {
